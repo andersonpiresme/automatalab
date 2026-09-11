@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>testes — AutomataLab</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 14px/1.6 system-ui, sans-serif; margin: 32px auto; max-width: 760px; padding: 0 16px; }
+    h1 { font-size: 18px; }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-top: 24px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 2px 0; }
+    .pass { color: #15803d; }
+    .fail { color: #b91c1c; }
+    pre { margin: 4px 0 8px 16px; padding: 8px; background: #0001; border-radius: 4px; white-space: pre-wrap; }
+    .summary { font-weight: 600; font-size: 15px; padding: 8px 12px; border-radius: 6px; background: #0001; }
+  </style>
+</head>
+<body>
+  <h1>AutomataLab — testes</h1>
+  <div id="results">executando…</div>
+
+  <script type="module">
+    import { run } from './tests/runner.js';
+    // a ordem dos imports define a ordem dos blocos no relatório
+    await import('./tests/model.test.js');
+    await import('./tests/jff.test.js');
+    await import('./tests/simulate.test.js');
+    await import('./tests/operations.test.js');
+    await import('./tests/convert.test.js');
+    await import('./tests/regex.test.js');
+    await import('./tests/grammar.test.js');
+    await import('./tests/moore.test.js');
+    await import('./tests/turing.test.js');
+    await import('./tests/examples.test.js');
+    await import('./tests/geometry.test.js');
+    const { failed } = run(document.getElementById('results'));
+    // facilita a checagem automatizada
+    window.__testsFailed = failed;
+  </script>
+</body>
+</html>

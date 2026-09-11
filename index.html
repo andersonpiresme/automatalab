@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AutomataLab</title>
+  <meta name="description" content="Editor e simulador web de autômatos finitos, com leitura e gravação de arquivos .jff.">
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <header class="menubar">
+    <h1>AutomataLab</h1>
+
+    <nav class="menus">
+      <details class="menu">
+        <summary>Arquivo</summary>
+        <div class="menu-items">
+          <button type="button" data-cmd="new">Novo autômato finito</button>
+          <button type="button" data-cmd="new-moore">Nova máquina de Moore</button>
+          <button type="button" data-cmd="new-turing">Nova máquina de Turing</button>
+          <hr>
+          <button type="button" data-cmd="open">Abrir .jff…</button>
+          <button type="button" data-cmd="merge">Mesclar .jff…</button>
+          <button type="button" data-cmd="save">Salvar .jff</button>
+          <hr>
+          <button type="button" data-cmd="export-svg">Salvar imagem SVG</button>
+          <button type="button" data-cmd="export-png">Salvar imagem PNG</button>
+          <button type="button" data-cmd="print">Imprimir…</button>
+          <hr>
+          <button type="button" data-cmd="example">Exemplo: AF que termina em 01</button>
+          <button type="button" data-cmd="example-turing">Exemplo: MT para aⁿbⁿ</button>
+        </div>
+      </details>
+
+      <details class="menu">
+        <summary>Entrada</summary>
+        <div class="menu-items">
+          <button type="button" data-cmd="fast-run">Execução rápida…</button>
+          <button type="button" data-cmd="step-closure">Passo a passo com fecho…</button>
+          <button type="button" data-cmd="step-state">Passo a passo por estado…</button>
+          <button type="button" data-cmd="multiple-run">Várias entradas…</button>
+        </div>
+      </details>
+
+      <details class="menu">
+        <summary>Testar</summary>
+        <div class="menu-items">
+          <button type="button" data-cmd="compare">Comparar equivalência com .jff…</button>
+          <hr>
+          <button type="button" data-cmd="hl-lambda">Destacar transições λ</button>
+          <button type="button" data-cmd="hl-nondet">Destacar não-determinismo</button>
+          <button type="button" data-cmd="clear-hl">Limpar destaques</button>
+        </div>
+      </details>
+
+      <details class="menu">
+        <summary>Converter</summary>
+        <div class="menu-items">
+          <button type="button" data-cmd="to-dfa">Converter para DFA</button>
+          <button type="button" data-cmd="minimize">Minimizar DFA</button>
+          <hr>
+          <button type="button" data-cmd="to-regex">Converter para expressão regular</button>
+          <button type="button" data-cmd="to-grammar">Converter para gramática regular</button>
+          <hr>
+          <button type="button" data-cmd="from-regex">Autômato a partir de expressão regular…</button>
+          <button type="button" data-cmd="from-grammar">Autômato a partir de gramática…</button>
+          <hr>
+          <button type="button" data-cmd="remove-unreachable">Remover estados inalcançáveis</button>
+          <button type="button" data-cmd="remove-useless">Remover estados inúteis</button>
+          <button type="button" data-cmd="trap">Adicionar estado de erro</button>
+        </div>
+      </details>
+
+      <details class="menu">
+        <summary>Exibir</summary>
+        <div class="menu-items">
+          <button type="button" data-cmd="fit">Enquadrar</button>
+          <button type="button" data-cmd="layout">Reposicionar automaticamente</button>
+          <hr>
+          <button type="button" data-cmd="tape-convention">Fita: alternar Menezes (Δ) / JFLAP</button>
+        </div>
+      </details>
+    </nav>
+
+    <div class="modes" role="group" aria-label="Ferramenta">
+      <button type="button" data-mode="select">Selecionar</button>
+      <button type="button" data-mode="state">Estado</button>
+      <button type="button" data-mode="transition">Transição</button>
+      <button type="button" data-mode="erase">Apagar</button>
+    </div>
+
+    <div class="modes" role="group" aria-label="Histórico">
+      <button type="button" data-cmd="undo" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">↶</button>
+      <button type="button" data-cmd="redo" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer">↷</button>
+    </div>
+
+    <span id="file-name" class="file-name">automato.jff</span>
+    <input id="file-input" type="file" accept=".jff,.xml" hidden>
+    <input id="merge-input" type="file" accept=".jff,.xml" hidden>
+    <input id="compare-input" type="file" accept=".jff,.xml" hidden>
+  </header>
+
+  <main>
+    <div class="canvas-wrap">
+      <svg id="canvas" preserveAspectRatio="xMidYMid meet" role="application"
+           aria-label="Diagrama do autômato"></svg>
+      <p id="status" class="status info">Carregando…</p>
+    </div>
+
+    <aside class="sidebar">
+      <section>
+        <h2>Simulação</h2>
+        <div class="sim-run">
+          <input id="sim-input" type="text" autocomplete="off" spellcheck="false"
+                 placeholder="cadeia de entrada" aria-label="Cadeia de entrada">
+          <button type="button" id="sim-fast" class="primary">Testar</button>
+        </div>
+        <div id="sim-panel"></div>
+      </section>
+
+      <section>
+        <h2>Seleção</h2>
+        <div id="details"></div>
+      </section>
+
+      <section>
+        <h2>Tabela de transições</h2>
+        <div id="transition-table"></div>
+      </section>
+    </aside>
+  </main>
+
+  <dialog id="prompt-dialog">
+    <form method="dialog">
+      <label id="prompt-label" for="prompt-input">Valor</label>
+      <input id="prompt-input" type="text" autocomplete="off" spellcheck="false">
+      <p id="prompt-hint" class="hint"></p>
+      <menu>
+        <!-- Cancelar não é submit: assim o Enter no campo confirma, não cancela -->
+        <button type="button" id="prompt-cancel">Cancelar</button>
+        <button type="submit" value="ok" class="primary">OK</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="text-dialog">
+    <label id="text-label" for="text-area">Texto</label>
+    <textarea id="text-area" rows="7" spellcheck="false" autocomplete="off"></textarea>
+    <p id="text-hint" class="hint"></p>
+    <menu>
+      <button type="button" id="text-cancel">Cancelar</button>
+      <button type="button" id="text-ok" class="primary">OK</button>
+    </menu>
+  </dialog>
+
+  <dialog id="batch-dialog">
+    <label for="batch-input">Uma cadeia por linha</label>
+    <textarea id="batch-input" rows="6" spellcheck="false"
+              placeholder="01&#10;1101&#10;(linha vazia = cadeia vazia)"></textarea>
+    <div id="batch-results"></div>
+    <menu>
+      <button type="button" id="batch-close">Fechar</button>
+      <button type="button" id="batch-run" class="primary">Executar</button>
+    </menu>
+  </dialog>
+
+  <script type="module" src="./src/ui/app.js"></script>
+</body>
+</html>
