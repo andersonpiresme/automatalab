@@ -4,6 +4,7 @@ Editor e simulador web de autômatos finitos, com leitura e gravação do format
 `.jff`. Roda inteiro no navegador — sem servidor, sem instalação, sem Java.
 
 **Acesse:** <https://andersonpiresme.github.io/automatalab/>
+**Documentação:** <https://andersonpiresme.github.io/automatalab/docs/>
 
 ## Contexto
 

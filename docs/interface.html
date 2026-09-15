@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interface e menus — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html" aria-current="page">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Interface e menus</h1>
+      <p class="subtitle">Cada comando, cada ferramenta, cada atalho</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#ferramentas-de-edição"
+id="toc-ferramentas-de-edição">Ferramentas de edição</a></li>
+<li><a href="#o-diálogo-de-transição" id="toc-o-diálogo-de-transição">O
+diálogo de transição</a></li>
+<li><a href="#painel-de-seleção" id="toc-painel-de-seleção">Painel de
+seleção</a></li>
+<li><a href="#menu-arquivo" id="toc-menu-arquivo">Menu Arquivo</a></li>
+<li><a href="#menu-entrada" id="toc-menu-entrada">Menu Entrada</a></li>
+<li><a href="#menu-testar" id="toc-menu-testar">Menu Testar</a></li>
+<li><a href="#menu-converter" id="toc-menu-converter">Menu
+Converter</a></li>
+<li><a href="#menu-exibir" id="toc-menu-exibir">Menu Exibir</a></li>
+<li><a href="#atalhos-de-teclado" id="toc-atalhos-de-teclado">Atalhos de
+teclado</a></li>
+</ul>
+      </nav>
+<h2 id="ferramentas-de-edição">Ferramentas de edição</h2>
+<p>Os quatro botões à direita da barra de menus mudam o que um clique na
+área de desenho faz. A linha de status lembra o que a ferramenta ativa
+espera.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ferramenta</th>
+<th>Clique no vazio</th>
+<th>Clique num estado</th>
+<th>Outros</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Selecionar</strong></td>
+<td>limpa a seleção</td>
+<td>seleciona; arrastar move</td>
+<td>clique numa aresta seleciona a transição; duplo clique num estado
+renomeia</td>
+</tr>
+<tr>
+<td><strong>Estado</strong></td>
+<td>cria um estado</td>
+<td>—</td>
+<td>o primeiro estado criado vira inicial</td>
+</tr>
+<tr>
+<td><strong>Transição</strong></td>
+<td>cancela a origem</td>
+<td>primeiro clique marca a origem, segundo marca o destino e abre o
+diálogo</td>
+<td>clicar duas vezes no mesmo estado cria um laço</td>
+</tr>
+<tr>
+<td><strong>Apagar</strong></td>
+<td>—</td>
+<td>remove o estado e suas transições</td>
+<td>clique numa aresta remove todas as transições dela</td>
+</tr>
+</tbody>
+</table>
+<h2 id="o-diálogo-de-transição">O diálogo de transição</h2>
+<p>Ao criar uma transição, a ferramenta pergunta o rótulo. O que se
+digita depende do tipo de máquina:</p>
+<ul>
+<li><strong>Autômato finito e Moore</strong>: o símbolo lido. Vazio,
+<code>λ</code> ou <code>lambda</code> criam uma transição vazia.
+Vírgulas criam várias transições de uma vez: <code>a,b</code> cria duas,
+uma lendo <code>a</code> e outra lendo <code>b</code>.</li>
+<li><strong>Máquina de Turing</strong>: a tripla
+<code>lido,gravado,movimento</code>, na notação das aulas —
+<code>a,A,D</code>. Aceita <code>E</code>/<code>D</code>
+(esquerda/direita) ou <code>L</code>/<code>R</code>/<code>S</code>;
+<code>ß</code>, <code>□</code>, <code>_</code> ou vazio para o branco;
+<code>Δ</code> ou <code>^</code> para o marcador de início. Ponto e
+vírgula separa várias: <code>a,A,D; b,B,E</code>.</li>
+</ul>
+<p>Se a tripla vier malformada, o diálogo recusa com a mensagem do erro
+e nada é alterado.</p>
+<h2 id="painel-de-seleção">Painel de seleção</h2>
+<p>Com um <strong>estado</strong> selecionado: renomear, tornar inicial,
+marcar ou remover final (autômatos finitos e MT) ou definir a saída
+(Moore), excluir.</p>
+<p>Com uma <strong>transição</strong> selecionada: a lista dos rótulos
+entre aquele par de estados, cada um com o botão para removê-lo, e o
+botão para adicionar outro.</p>
+<h2 id="menu-arquivo">Menu Arquivo</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Novo autômato finito / Nova máquina de Moore / Nova máquina de
+Turing</td>
+<td>começa um documento vazio do tipo escolhido</td>
+</tr>
+<tr>
+<td>Abrir .jff…</td>
+<td>lê um arquivo do JFLAP ou do próprio AutomataLab</td>
+</tr>
+<tr>
+<td>Mesclar .jff…</td>
+<td>traz os estados e transições de outro arquivo para o documento
+atual, sem conectá-los — a “união disjunta” que o JFLAP chama de
+<em>Combine Automata</em>. Os tipos precisam coincidir</td>
+</tr>
+<tr>
+<td>Salvar .jff</td>
+<td>grava o documento no formato do JFLAP</td>
+</tr>
+<tr>
+<td>Salvar imagem SVG / PNG</td>
+<td>exporta o diagrama, na paleta clara, recortado no conteúdo</td>
+</tr>
+<tr>
+<td>Imprimir…</td>
+<td>abre o diálogo de impressão com só o diagrama, em preto e
+branco</td>
+</tr>
+<tr>
+<td>Exemplo: AF que termina em 01</td>
+<td>carrega o DFA das cadeias binárias terminadas em
+<code>01</code></td>
+</tr>
+<tr>
+<td>Exemplo: MT para aⁿbⁿ</td>
+<td>carrega a máquina de Turing do slide 10 da aula 9, com a mesma
+disposição</td>
+</tr>
+</tbody>
+</table>
+<p>A ferramenta também aceita <code>?open=&lt;url&gt;</code> no endereço
+para abrir um arquivo direto — útil para compartilhar um exercício por
+link.</p>
+<h2 id="menu-entrada">Menu Entrada</h2>
+<p>Espelha o menu <em>Input</em> do JFLAP.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Execução rápida…</td>
+<td>roda a cadeia do campo de simulação até o fim e mostra o veredito;
+para MT, mostra também a fita final e o número de passos</td>
+</tr>
+<tr>
+<td>Passo a passo com fecho…</td>
+<td>para autômatos finitos, cada passo consome um símbolo e o conjunto
+de estados já vem fechado sob λ — a leitura clássica de δ*; para MT e
+Moore, é o passo a passo comum</td>
+</tr>
+<tr>
+<td>Passo a passo por estado…</td>
+<td>para autômatos finitos, cada transição λ é um passo próprio, que não
+consome entrada</td>
+</tr>
+<tr>
+<td>Várias entradas…</td>
+<td>uma cadeia por linha; devolve a tabela de vereditos (ou de saídas,
+para Moore; com contagem de passos, para MT)</td>
+</tr>
+</tbody>
+</table>
+<p>No passo a passo, os botões ⏮ ◀ ▶ ⏭ e as setas ← → do teclado navegam
+entre os passos, e os estados ativos ficam destacados no diagrama.</p>
+<h2 id="menu-testar">Menu Testar</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Comparar equivalência com .jff…</td>
+<td>abre outro autômato finito e verifica se os dois reconhecem a mesma
+linguagem; se não, mostra a <strong>menor cadeia que os
+distingue</strong> e a deixa no campo de simulação</td>
+</tr>
+<tr>
+<td>Destacar transições λ</td>
+<td>marca no diagrama as arestas com transição vazia</td>
+</tr>
+<tr>
+<td>Destacar não-determinismo</td>
+<td>marca os estados com mais de uma transição para o mesmo símbolo, ou
+com transição λ</td>
+</tr>
+<tr>
+<td>Limpar destaques</td>
+<td>remove as marcações e o resultado da simulação</td>
+</tr>
+</tbody>
+</table>
+<h2 id="menu-converter">Menu Converter</h2>
+<p>Vale para autômatos finitos; com Moore ou MT abertos, os itens
+respondem com um aviso. O resultado substitui o documento atual —
+desfazer recupera o anterior.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Converter para DFA</td>
+<td>construção de subconjuntos; cada estado novo é nomeado pelo conjunto
+de origem, como <code>q0q1</code></td>
+</tr>
+<tr>
+<td>Minimizar DFA</td>
+<td>refinamento de partições; exige um DFA</td>
+</tr>
+<tr>
+<td>Converter para expressão regular</td>
+<td>eliminação de estados</td>
+</tr>
+<tr>
+<td>Converter para gramática regular</td>
+<td>gramática linear à direita, com <code>S</code> como variável
+inicial</td>
+</tr>
+<tr>
+<td>Autômato a partir de expressão regular…</td>
+<td>construção de Thompson; sintaxe do JFLAP: <code>+</code> ou
+<code>\|</code>, <code>*</code>, parênteses, <code>λ</code></td>
+</tr>
+<tr>
+<td>Autômato a partir de gramática…</td>
+<td>uma produção por linha: <code>S -&gt; aS \| b</code></td>
+</tr>
+<tr>
+<td>Remover estados inalcançáveis</td>
+<td>os que nenhum caminho a partir do inicial atinge</td>
+</tr>
+<tr>
+<td>Remover estados inúteis</td>
+<td>os de onde nenhum final é alcançável</td>
+</tr>
+<tr>
+<td>Adicionar estado de erro</td>
+<td>completa a função de transição com um sumidouro — o <em>trap
+state</em> do JFLAP</td>
+</tr>
+</tbody>
+</table>
+<h2 id="menu-exibir">Menu Exibir</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Enquadrar</td>
+<td>ajusta o zoom para caber todo o autômato</td>
+</tr>
+<tr>
+<td>Reposicionar automaticamente</td>
+<td>reorganiza os estados por força dirigida — o resultado é sempre o
+mesmo para o mesmo autômato</td>
+</tr>
+<tr>
+<td>Fita: alternar Menezes (Δ) / JFLAP</td>
+<td>só para MT; troca a convenção da fita (ver o capítulo de máquinas de
+Turing)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="atalhos-de-teclado">Atalhos de teclado</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tecla</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>⌘</kbd>+<kbd>Z</kbd></td>
+<td>desfazer</td>
+</tr>
+<tr>
+<td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td>
+<td>refazer</td>
+</tr>
+<tr>
+<td><kbd>Delete</kbd> ou <kbd>Backspace</kbd></td>
+<td>exclui o que está selecionado</td>
+</tr>
+<tr>
+<td><kbd>Esc</kbd></td>
+<td>cancela a transição em criação, limpa a seleção, fecha menus</td>
+</tr>
+<tr>
+<td><kbd>Enter</kbd> no campo de simulação</td>
+<td>execução rápida</td>
+</tr>
+<tr>
+<td><kbd>←</kbd> <kbd>→</kbd> durante o passo a passo</td>
+<td>passo anterior / próximo</td>
+</tr>
+</tbody>
+</table>
+<p>O desfazer guarda até 60 alterações, incluindo conversões e
+movimentos de estados. Um clique que não move nada não entra no
+histórico.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="index.html">← Introdução</a>
+      <a class="next" href="automatos-finitos.html">Autômatos
+finitos →</a>
+    </footer>
+  </main>
+</body>
+</html>

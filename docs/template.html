@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>$title$ — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html"$if(is-index)$ aria-current="page"$endif$>Introdução</a></li>
+      <li><a href="interface.html"$if(is-interface)$ aria-current="page"$endif$>Interface e menus</a></li>
+      <li><a href="automatos-finitos.html"$if(is-af)$ aria-current="page"$endif$>Autômatos finitos</a></li>
+      <li><a href="moore.html"$if(is-moore)$ aria-current="page"$endif$>Máquinas de Moore</a></li>
+      <li><a href="turing.html"$if(is-turing)$ aria-current="page"$endif$>Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html"$if(is-jff)$ aria-current="page"$endif$>O formato .jff</a></li>
+      <li><a href="arquitetura.html"$if(is-arq)$ aria-current="page"$endif$>Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>$title$</h1>
+$if(subtitle)$
+      <p class="subtitle">$subtitle$</p>
+$endif$
+$if(toc)$
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+$table-of-contents$
+      </nav>
+$endif$
+$body$
+    </article>
+    <footer class="chapter-nav">
+$if(prev)$
+      <a class="prev" href="$prev-href$">← $prev$</a>
+$else$
+      <span></span>
+$endif$
+$if(next)$
+      <a class="next" href="$next-href$">$next$ →</a>
+$endif$
+    </footer>
+  </main>
+</body>
+</html>

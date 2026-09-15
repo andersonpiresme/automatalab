@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Máquinas de Turing — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="turing.html" aria-current="page">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Máquinas de Turing</h1>
+      <p class="subtitle">A definição das aulas, implementada célula a
+célula</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#a-definição" id="toc-a-definição">A definição</a></li>
+<li><a href="#a-fita" id="toc-a-fita">A fita</a></li>
+<li><a href="#transições" id="toc-transições">Transições</a></li>
+<li><a href="#condições-de-parada"
+id="toc-condições-de-parada">Condições de parada</a></li>
+<li><a href="#simulação" id="toc-simulação">Simulação</a></li>
+<li><a href="#o-exemplo-do-slide-10" id="toc-o-exemplo-do-slide-10">O
+exemplo do slide 10</a></li>
+<li><a href="#escopo" id="toc-escopo">Escopo</a></li>
+</ul>
+      </nav>
+<h2 id="a-definição">A definição</h2>
+<p>A ferramenta implementa a máquina de Turing como a disciplina a
+define — a 8-upla de Menezes:</p>
+<blockquote>
+<p>M = (Σ, Q, Π, q₀, F, V, ß, Δ)</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Significado</th>
+<th>No AutomataLab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Σ</td>
+<td>alfabeto de entrada</td>
+<td>inferido das transições: minúsculas e dígitos</td>
+</tr>
+<tr>
+<td>Q</td>
+<td>estados</td>
+<td>os círculos do diagrama</td>
+</tr>
+<tr>
+<td>Π</td>
+<td>função programa: Q × (Σ ∪ V ∪ {ß, Δ}) → Q × (Σ ∪ V ∪ {ß, Δ}) × {E,
+D}</td>
+<td>as transições; a tabela Π no painel lateral</td>
+</tr>
+<tr>
+<td>q₀</td>
+<td>estado inicial</td>
+<td>seta à esquerda</td>
+</tr>
+<tr>
+<td>F</td>
+<td>estados finais</td>
+<td>círculo duplo</td>
+</tr>
+<tr>
+<td>V</td>
+<td>alfabeto auxiliar</td>
+<td>inferido: maiúsculas</td>
+</tr>
+<tr>
+<td>ß</td>
+<td>branco</td>
+<td>célula vazia; exibido como <code>ß</code></td>
+</tr>
+<tr>
+<td>Δ</td>
+<td>marcador de início</td>
+<td>célula 0 da fita; exibido como <code>Δ</code></td>
+</tr>
+</tbody>
+</table>
+<p>Π é uma <strong>função parcial</strong>: para cada par (estado,
+símbolo lido) há no máximo uma tripla (novo estado, símbolo gravado,
+movimento). A validação avisa quando o mesmo estado tem duas transições
+para o mesmo símbolo lido — a máquina passa a ser não-determinística, o
+que a definição das aulas não prevê, mas a simulação continua
+funcionando (ver abaixo).</p>
+<h2 id="a-fita">A fita</h2>
+<p>Na convenção das aulas, a fita é <strong>semi-infinita</strong>:
+começa na célula 0, que contém <code>Δ</code>, e cresce só para a
+direita. A entrada ocupa as células 1 a <em>n</em>; o resto é branco. A
+cabeça de leitura começa <strong>sobre o Δ</strong>, na célula 0.</p>
+<p>A ferramenta chama isso de convenção <strong>Menezes</strong> e a
+adota por padrão. Existe uma segunda, chamada <strong>JFLAP</strong>,
+para abrir arquivos feitos lá:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Menezes (padrão)</th>
+<th>JFLAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Célula 0</td>
+<td><code>Δ</code></td>
+<td>primeiro símbolo da entrada</td>
+</tr>
+<tr>
+<td>Cabeça começa</td>
+<td>sobre o <code>Δ</code></td>
+<td>sobre o primeiro símbolo</td>
+</tr>
+<tr>
+<td>Fita</td>
+<td>cresce só à direita</td>
+<td>infinita nos dois lados</td>
+</tr>
+<tr>
+<td>Mover à esquerda do início</td>
+<td><strong>rejeita</strong> (movimento inválido)</td>
+<td>a fita cresce</td>
+</tr>
+<tr>
+<td>Branco</td>
+<td><code>ß</code></td>
+<td><code>□</code></td>
+</tr>
+<tr>
+<td>Movimentos exibidos</td>
+<td><code>E</code> / <code>D</code></td>
+<td><code>L</code> / <code>R</code> / <code>S</code></td>
+</tr>
+</tbody>
+</table>
+<p>Uma máquina desenhada para uma convenção <strong>não roda na
+outra</strong> sem adaptação: na Menezes a primeira transição sempre lê
+<code>Δ</code>, e na JFLAP não há <code>Δ</code> para ler. Ao abrir um
+<code>.jff</code>, a ferramenta infere a convenção — máquina que
+menciona <code>Δ</code> é Menezes — e <em>Exibir → Fita</em> permite
+trocar.</p>
+<h2 id="transições">Transições</h2>
+<p>Cada transição é uma tripla <code>(lido, gravado, movimento)</code>,
+desenhada assim na aresta e digitada assim no diálogo:
+<code>a,A,D</code>. Várias transições entre o mesmo par de estados
+aparecem uma por linha na aresta.</p>
+<table>
+<thead>
+<tr>
+<th>Movimento</th>
+<th>Digite</th>
+<th>Exibido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>esquerda</td>
+<td><code>E</code> ou <code>L</code></td>
+<td><code>E</code></td>
+</tr>
+<tr>
+<td>direita</td>
+<td><code>D</code> ou <code>R</code></td>
+<td><code>D</code></td>
+</tr>
+<tr>
+<td>parado</td>
+<td><code>S</code> ou <code>P</code></td>
+<td><code>S</code></td>
+</tr>
+</tbody>
+</table>
+<p>O branco pode ser digitado como <code>ß</code>, <code>□</code>,
+<code>_</code> ou simplesmente nada (<code>,,D</code> lê branco, grava
+branco, move à direita). O marcador é <code>Δ</code> ou <code>^</code>.
+A letra <code>b</code> é a letra <code>b</code> — nunca é interpretada
+como branco.</p>
+<p>A <strong>tabela Π</strong> no painel lateral tem as colunas na ordem
+dos slides: <code>Δ</code>, os símbolos de entrada, os auxiliares,
+<code>ß</code>. Cada célula mostra
+<code>(destino, gravado, movimento)</code>.</p>
+<h2 id="condições-de-parada">Condições de parada</h2>
+<p>As três do slide 26, nomeadas no veredito:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Condição</th>
+<th>O que acontece</th>
+<th>Veredito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Estado final</strong></td>
+<td>a máquina entra num estado de F</td>
+<td><strong>Aceita</strong> — parou em estado final</td>
+</tr>
+<tr>
+<td><strong>Função indefinida</strong></td>
+<td>Π não tem entrada para (estado atual, símbolo lido)</td>
+<td><strong>Rejeita</strong> — função indefinida</td>
+</tr>
+<tr>
+<td><strong>Movimento inválido</strong></td>
+<td>a transição manda para a esquerda e a cabeça está na célula 0</td>
+<td><strong>Rejeita</strong> — movimento inválido à esquerda do Δ</td>
+</tr>
+</tbody>
+</table>
+<p>Há uma quarta situação, que não é parada: a máquina pode <strong>não
+parar</strong>. A ferramenta limita a execução a 10.000 passos e,
+atingido o limite, informa <em>“não parou — possível loop”</em>. Isso é
+deliberadamente diferente de rejeitar: é a distinção entre REJEITA(M) e
+LOOP(M) do slide 38, e é o que separa linguagem recursiva de
+recursivamente enumerável.</p>
+<p>Um detalhe que costuma gerar dúvida: o estado final aceita <strong>ao
+ser alcançado</strong>. A máquina não executa a transição que sairia
+dele — mesmo que exista — e não verifica o que está sob a cabeça. Por
+isso um somador que termina com a cabeça sobre o <code>Δ</code> num
+estado final aceita sem disparar “movimento inválido”.</p>
+<h2 id="simulação">Simulação</h2>
+<p>A <strong>execução rápida</strong> roda até parar e mostra a fita
+final, com a cabeça destacada, o veredito e o número de passos. Se
+aceitou, mostra também o conteúdo útil da fita — sem <code>Δ</code> e
+sem brancos nas pontas — que é o resultado quando a máquina computa uma
+função.</p>
+<p>O <strong>passo a passo</strong> mostra, a cada passo, o estado atual
+e a fita inteira, com a célula sob a cabeça destacada. Os botões ⏮ ◀ ▶ ⏭
+e as setas do teclado navegam. O estado atual fica destacado no
+diagrama.</p>
+<p><strong>Várias entradas</strong> devolve, para cada linha, o veredito
+e o número de passos.</p>
+<h3 id="não-determinismo">Não-determinismo</h3>
+<p>Se Π não for função, a simulação percorre todas as computações em
+largura, como faz para autômatos finitos. O passo a passo mostra todas
+as configurações vivas de cada geração e avisa quantas são. A máquina
+aceita se <strong>alguma</strong> computação atinge estado final. Isso
+está fora da definição das aulas, mas o slide 27 lista o
+não-determinismo entre as variações que não acrescentam poder — e a
+ferramenta deixa isso verificável.</p>
+<h2 id="o-exemplo-do-slide-10">O exemplo do slide 10</h2>
+<p><em>Arquivo → Exemplo: MT para aⁿbⁿ</em> carrega a máquina do slide
+10 da aula 9, com os estados na mesma disposição do slide. A estratégia
+é a clássica: marcar um <code>a</code> como <code>A</code>, ir até o
+primeiro <code>b</code> e marcá-lo como <code>B</code>, voltar ao
+<code>A</code> e repetir; quando não há mais <code>a</code>, conferir
+que só restaram <code>B</code> até o branco.</p>
+<p>Com a entrada <code>aabb</code>, o passo a passo reproduz os slides
+11 a 25 célula a célula, e aceita em 14 passos com a fita
+<code>Δ A A B B</code>. Com <code>aab</code>, rejeita por função
+indefinida no passo 8: a máquina volta procurando um <code>A</code> e o
+que encontra não tem transição.</p>
+<p>Esse exemplo é a verificação mais direta de que a ferramenta
+implementa a definição da disciplina, e não outra.</p>
+<h2 id="escopo">Escopo</h2>
+<p>Uma fita, uma cabeça. Arquivos <code>.jff</code> com
+<code>&lt;tapes&gt;2&lt;/tapes&gt;</code> ou mais são recusados com uma
+mensagem clara. Os <em>building blocks</em> do JFLAP 7 são ignorados com
+aviso. O <code>~</code> do JFLAP 7 (grava o que leu) é aceito na
+leitura.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="moore.html">← Máquinas de Moore</a>
+      <a class="next" href="formato-jff.html">O formato .jff →</a>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Máquinas de Moore — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html" aria-current="page">Máquinas de Moore</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Máquinas de Moore</h1>
+      <p class="subtitle">Quando o autômato produz saída em vez de
+aceitar</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#o-modelo" id="toc-o-modelo">O modelo</a></li>
+<li><a href="#execução" id="toc-execução">Execução</a></li>
+<li><a href="#compatibilidade-com-o-jflap"
+id="toc-compatibilidade-com-o-jflap">Compatibilidade com o
+JFLAP</a></li>
+<li><a href="#o-que-falta" id="toc-o-que-falta">O que falta</a></li>
+</ul>
+      </nav>
+<h2 id="o-modelo">O modelo</h2>
+<p>Uma máquina de Moore é um transdutor: em vez de aceitar ou rejeitar,
+emite uma saída. Na variante de Moore, a saída pertence ao
+<strong>estado</strong> — cada estado tem um valor associado, e a
+máquina emite o valor do estado em que está.</p>
+<p>Consequências diretas no editor:</p>
+<ul>
+<li>não há estado final; onde estaria <em>Marcar final</em> aparece
+<strong>Definir saída</strong>;</li>
+<li>a saída de cada estado é desenhada em azul abaixo do círculo, como
+<code>/hora</code>;</li>
+<li>a tabela de transições ganha uma coluna <strong>saída</strong> antes
+das colunas de símbolos;</li>
+<li>a validação deixa de exigir estado final e passa a apontar estados
+sem saída definida.</li>
+</ul>
+<h2 id="execução">Execução</h2>
+<p>A máquina emite a saída do estado inicial antes de ler qualquer
+símbolo e, a partir daí, uma saída por transição percorrida. Para uma
+entrada de <em>n</em> símbolos, a fita de saída tem <em>n</em> + 1
+valores.</p>
+<p>A execução é determinística: havendo mais de uma transição possível,
+a ferramenta segue a primeira e <strong>avisa</strong> no painel — não
+escolhe em silêncio. Quando não há transição para o símbolo lido, a
+execução trava, e o painel diz em que estado e para qual símbolo.</p>
+<p>O passo a passo mostra a saída acumulada até o passo atual; a
+execução em lote mostra a fita de saída completa de cada entrada.</p>
+<h2 id="compatibilidade-com-o-jflap">Compatibilidade com o JFLAP</h2>
+<p>Os arquivos <code>.jff</code> do tipo <code>moore</code> gravam a
+saída em <code>&lt;output&gt;</code> dentro de cada estado — e
+repetem-na em <code>&lt;transout&gt;</code> dentro de cada transição,
+redundantemente. O AutomataLab lê o <code>&lt;output&gt;</code>, ignora
+o <code>&lt;transout&gt;</code> na leitura e o reconstrói na gravação a
+partir do estado de destino. O arquivo continua abrindo no JFLAP, mas a
+fonte da verdade é uma só.</p>
+<h2 id="o-que-falta">O que falta</h2>
+<p><strong>Máquinas de Mealy</strong> — a variante em que a saída fica
+na transição — não estão implementadas. Arquivos <code>.jff</code> do
+tipo <code>mealy</code> são recusados com uma mensagem explícita, em vez
+de abertos como se fossem outra coisa.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="automatos-finitos.html">← Autômatos
+finitos</a>
+      <a class="next" href="turing.html">Máquinas de Turing →</a>
+    </footer>
+  </main>
+</body>
+</html>

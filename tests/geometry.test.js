@@ -1,6 +1,8 @@
 import { describe, test, assert, assertEqual } from './runner.js';
 import {
+  LOOP_UP,
   STATE_RADIUS,
+  bestLoopAngle,
   boundingBox,
   distance,
   distanceToSegment,
@@ -57,10 +59,48 @@ describe('geometry: arestas', () => {
     assert(!geometry.path.includes('NaN'), `path inválido: ${geometry.path}`);
   });
 
-  test('o laço fica acima do estado', () => {
+  test('o laço fica acima do estado por padrão', () => {
     const state = { x: 100, y: 100 };
     const geometry = selfLoopGeometry(state);
     assert(geometry.label.y < state.y - STATE_RADIUS, 'o rótulo do laço deveria ficar acima');
+    assertEqual(Math.round(geometry.label.x), state.x);
+  });
+
+  test('o laço rotacionado para a direita põe o rótulo à direita', () => {
+    const state = { x: 100, y: 100 };
+    const geometry = selfLoopGeometry(state, 0);
+    assert(geometry.label.x > state.x + STATE_RADIUS, 'rótulo deveria estar à direita');
+    assertEqual(Math.round(geometry.label.y), state.y);
+  });
+});
+
+describe('geometry: direção do laço', () => {
+  test('sem vizinhos, aponta para cima', () => {
+    assertEqual(bestLoopAngle({ x: 0, y: 0 }, []), LOOP_UP);
+  });
+
+  test('vizinhos só nos lados deixam o laço para cima', () => {
+    const s = { x: 100, y: 100 };
+    const angle = bestLoopAngle(s, [{ x: 0, y: 100 }, { x: 200, y: 100 }]);
+    assertEqual(angle, LOOP_UP);
+  });
+
+  test('vizinho diretamente acima empurra o laço para outro lado', () => {
+    const s = { x: 100, y: 100 };
+    const angle = bestLoopAngle(s, [{ x: 100, y: 0 }]);
+    // o único vão é o resto do círculo; o meio dele é "para baixo"
+    assertEqual(Math.round(Math.sin(angle)), 1);
+  });
+
+  test('vizinhos acima e à esquerda deixam o laço apontando para baixo-direita', () => {
+    const s = { x: 100, y: 100 };
+    const angle = bestLoopAngle(s, [{ x: 100, y: 0 }, { x: 0, y: 100 }]);
+    assert(Math.cos(angle) > 0 && Math.sin(angle) > 0, `ângulo ${angle} não aponta para baixo-direita`);
+  });
+
+  test('o próprio estado na lista é ignorado', () => {
+    const s = { x: 100, y: 100 };
+    assertEqual(bestLoopAngle(s, [s]), LOOP_UP);
   });
 });
 

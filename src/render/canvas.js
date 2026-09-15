@@ -10,6 +10,7 @@ import { groupTransitions, transitionLabel } from '../core/model.js';
 import {
   STATE_RADIUS,
   FINAL_RING_GAP,
+  bestLoopAngle,
   edgeGeometry,
   initialMarkerGeometry,
   obstacleOnEdge,
@@ -65,6 +66,16 @@ export function render(root, automaton, view) {
   const groups = groupTransitions(automaton);
   const pairs = new Set(groups.map((g) => `${g.from}->${g.to}`));
 
+  // vizinhos de cada estado, para o laço fugir das arestas que chegam a ele
+  const neighbors = new Map();
+  for (const g of groups) {
+    if (g.from === g.to) continue;
+    for (const [a, b] of [[g.from, g.to], [g.to, g.from]]) {
+      if (!neighbors.has(a)) neighbors.set(a, []);
+      neighbors.get(a).push(byId.get(b));
+    }
+  }
+
   for (const group of groups) {
     const from = byId.get(group.from);
     const to = byId.get(group.to);
@@ -79,7 +90,9 @@ export function render(root, automaton, view) {
       const obstacle = obstacleOnEdge(from, to, automaton.states);
       if (obstacle) options = { detour: true, side: -sideOf(obstacle, from, to) };
     }
-    const geometry = selfLoop ? selfLoopGeometry(from) : edgeGeometry(from, to, curved, options);
+    const geometry = selfLoop
+      ? selfLoopGeometry(from, bestLoopAngle(from, (neighbors.get(from.id) || []).filter(Boolean)))
+      : edgeGeometry(from, to, curved, options);
 
     const selected =
       view.selection?.kind === 'transition' &&
@@ -103,20 +116,36 @@ export function render(root, automaton, view) {
     // AF: "a, b"; MT: uma tripla por linha, como no slide do curso
     const labels = group.transitions.map((t) => transitionLabel(automaton, t));
     const turing = automaton.type === 'turing';
+
+    // num laço, o rótulo cresce para fora do estado: um laço apontado para a
+    // direita ancora o texto à esquerda, um apontado para cima empilha as
+    // linhas para cima, e assim por diante
+    let anchor = 'middle';
+    let firstOffset = 0;
+    const lineHeight = 14;
+    if (selfLoop) {
+      const cos = Math.cos(geometry.angle);
+      const sin = Math.sin(geometry.angle);
+      if (cos > 0.5) anchor = 'start';
+      else if (cos < -0.5) anchor = 'end';
+      if (sin < -0.5) firstOffset = -(labels.length - 1) * lineHeight;
+      else if (sin > 0.5) firstOffset = 0;
+      else firstOffset = -((labels.length - 1) * lineHeight) / 2;
+    } else {
+      firstOffset = -((labels.length - 1) * lineHeight) / 2;
+    }
+
     const label = svg('text', {
       x: geometry.label.x,
       y: geometry.label.y,
       class: 'edge-label',
-      'text-anchor': 'middle',
+      'text-anchor': anchor,
       'dominant-baseline': 'middle',
     }, turing ? null : labels.join(', '));
     if (turing) {
-      // centraliza o bloco de linhas verticalmente no ponto do rótulo
-      const lineHeight = 14;
-      const offset = -((labels.length - 1) * lineHeight) / 2;
       labels.forEach((text, i) => {
         label.appendChild(
-          svg('tspan', { x: geometry.label.x, dy: i === 0 ? offset : lineHeight }, text),
+          svg('tspan', { x: geometry.label.x, dy: i === 0 ? firstOffset : lineHeight }, text),
         );
       });
     }

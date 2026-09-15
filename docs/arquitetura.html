@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Como foi construído — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html" aria-current="page">Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Como foi construído</h1>
+      <p class="subtitle">Arquitetura, decisões, testes — e o papel da
+IA no desenvolvimento</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#sem-instalação-nem-para-desenvolver"
+id="toc-sem-instalação-nem-para-desenvolver">Sem instalação, nem para
+desenvolver</a></li>
+<li><a href="#camadas" id="toc-camadas">Camadas</a></li>
+<li><a href="#decisões-que-valem-registrar"
+id="toc-decisões-que-valem-registrar">Decisões que valem
+registrar</a></li>
+<li><a href="#testes" id="toc-testes">Testes</a></li>
+<li><a href="#o-papel-da-ia" id="toc-o-papel-da-ia">O papel da
+IA</a></li>
+<li><a href="#trabalho-futuro" id="toc-trabalho-futuro">Trabalho
+futuro</a></li>
+</ul>
+      </nav>
+<h2 id="sem-instalação-nem-para-desenvolver">Sem instalação, nem para
+desenvolver</h2>
+<p>A primeira decisão foi não ter etapa de compilação. O código é
+JavaScript com módulos ES nativos, que o navegador carrega direto; a
+interface é HTML e CSS sem framework; o diagrama é SVG gerado por
+código. Não há Node, npm, empacotador nem dependência externa. Um
+servidor de arquivos estáticos — o do Python que vem no macOS basta — é
+tudo que o desenvolvimento exige, e o GitHub Pages publica os arquivos
+exatamente como estão no repositório.</p>
+<p>Isso foi uma restrição do ambiente que virou princípio: uma
+ferramenta feita para dispensar instalação não deveria exigir instalação
+para ser modificada. Quem quiser mexer clona o repositório e abre.</p>
+<h2 id="camadas">Camadas</h2>
+<p>Os 4.500 linhas de código dividem-se em quatro camadas, e a
+dependência só aponta para baixo:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Camada</th>
+<th>Módulos</th>
+<th>Responsabilidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>core</strong></td>
+<td><code>model</code>, <code>simulate</code>, <code>turing</code>,
+<code>convert</code>, <code>regex</code>, <code>grammar</code>,
+<code>operations</code>, <code>examples</code></td>
+<td>o modelo de dados e todos os algoritmos; <strong>não toca no
+DOM</strong></td>
+</tr>
+<tr>
+<td><strong>io</strong></td>
+<td><code>jff</code>, <code>image</code></td>
+<td>leitura e gravação do <code>.jff</code>; exportação de imagem</td>
+</tr>
+<tr>
+<td><strong>render</strong></td>
+<td><code>geometry</code>, <code>canvas</code>, <code>layout</code></td>
+<td>cálculo das curvas, desenho em SVG, reposicionamento</td>
+</tr>
+<tr>
+<td><strong>ui</strong></td>
+<td><code>app</code></td>
+<td>menus, eventos, painéis, desfazer</td>
+</tr>
+</tbody>
+</table>
+<p>A camada <code>core</code> não sabe que existe uma tela. Por isso os
+algoritmos — subconjuntos, minimização, Thompson, eliminação de estados,
+a simulação da MT — são testáveis sem interface e reaproveitáveis por
+outro programa.</p>
+<h2 id="decisões-que-valem-registrar">Decisões que valem registrar</h2>
+<p><strong>Seguir as aulas, não o JFLAP.</strong> Onde a definição do
+curso difere da do JFLAP, a ferramenta segue o curso e mantém a do JFLAP
+como alternativa. O caso mais visível é a fita da máquina de Turing, com
+o <code>Δ</code> de Menezes.</p>
+<p><strong>Reimplementar em vez de derivar.</strong> A licença do JFLAP
+permite modificações, mas impõe condições — não cobrar, entregar o
+código à mantenedora quando pedido. Uma reimplementação independente
+pôde ser publicada sob MIT, sem amarras, e a Univali pode adotá-la,
+modificá-la e redistribuí-la sem pedir a ninguém. O que se reaproveitou
+do JFLAP foi só o formato de arquivo.</p>
+<p><strong>Conversões de resultado direto.</strong> O JFLAP faz o aluno
+construir o DFA passo a passo e corrige; o AutomataLab calcula e mostra.
+É a maior diferença pedagógica entre os dois e está registrada como
+trabalho futuro — os algoritmos que corrigiriam o aluno já existem,
+falta a interface guiada.</p>
+<p><strong>Desfazer cobre tudo.</strong> As conversões substituem o
+autômato inteiro. Sem um histórico de edição, um clique errado perderia
+o trabalho; por isso o desfazer guarda até 60 estados, incluindo o nome
+do arquivo.</p>
+<p><strong>O evento <code>close</code> do diálogo não é
+confiável.</strong> Descobriu-se que há navegadores embutidos que não o
+disparam, o que travava a interface. Os diálogos passaram a ser
+resolvidos pelos próprios botões, com o evento apenas como rede de
+segurança. É o tipo de detalhe que só aparece testando de verdade.</p>
+<h2 id="testes">Testes</h2>
+<p>Há <strong>219 testes automatizados</strong>, que rodam no próprio
+navegador em <a href="../tests.html"><code>tests.html</code></a> — sem
+ferramenta externa, com um runner de 60 linhas. Cobrem o modelo, o
+formato <code>.jff</code> (com fixtures dos três dialetos), a simulação
+de autômatos finitos, as conversões, expressões regulares, gramáticas,
+Moore e Turing.</p>
+<p>Os testes mais fortes são os de <strong>equivalência</strong>: em vez
+de conferir uma cadeia, provam que dois autômatos reconhecem a mesma
+linguagem. É assim que se verifica que a minimização preserva a
+linguagem, que ER → autômato → ER volta ao mesmo lugar, e que o
+<code>.jff</code> gravado e relido se comporta igual ao original.</p>
+<p>Para a máquina de Turing, a fixture é a máquina do slide 10, e um dos
+testes afirma que <code>aabb</code> aceita em exatamente 14 passos com a
+fita <code>[Δ] a a b b</code> no passo zero — a mesma sequência dos
+slides.</p>
+<h2 id="o-papel-da-ia">O papel da IA</h2>
+<p>O código, os testes e boa parte do desenho dos algoritmos foram
+escritos com uso intensivo de um assistente de IA, sob direção e revisão
+humanas. O histórico do repositório registra a coautoria em cada
+<em>commit</em>.</p>
+<p>O que foi decisão humana: o problema a resolver, o escopo e a ordem
+das fases, a exigência de seguir a convenção das aulas, a validação com
+os arquivos reais da disciplina, a escolha de publicar em aberto sob
+MIT, e a decisão de reimplementar em vez de derivar do JFLAP. O que foi
+execução assistida: a tradução dessas decisões em código e em
+testes.</p>
+<p>Registra-se isso aqui porque é uma forma de autoria diferente da
+tradicional, e é melhor que seja conhecida do que descoberta. A
+ferramenta é avaliável pelo que faz — os testes, os arquivos das aulas
+que abre, o exemplo do slide que reproduz — e não pela forma como foi
+digitada.</p>
+<h2 id="trabalho-futuro">Trabalho futuro</h2>
+<p>Em ordem de valor para a disciplina:</p>
+<ol type="1">
+<li><strong>Máquinas de Mealy</strong> — pequena: é Moore com a saída na
+transição.</li>
+<li><strong>Modo interativo das conversões</strong> — o aluno constrói,
+a ferramenta corrige. Os algoritmos existem; falta a interface.</li>
+<li><strong>Autômatos com pilha.</strong></li>
+<li><strong>Máquinas de Turing com várias fitas.</strong></li>
+<li><strong>Gramática como tipo de documento próprio</strong>, com CYK,
+LL(1) e LR(1).</li>
+</ol>
+<p>O código está em <a
+href="https://github.com/andersonpiresme/automatalab"
+class="uri">https://github.com/andersonpiresme/automatalab</a>, sob
+MIT.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="formato-jff.html">← O formato .jff</a>
+    </footer>
+  </main>
+</body>
+</html>

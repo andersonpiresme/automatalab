@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>O formato .jff — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html" aria-current="page">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>O formato .jff</h1>
+      <p class="subtitle">Como o AutomataLab conversa com o JFLAP</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#o-que-é" id="toc-o-que-é">O que é</a></li>
+<li><a href="#dialetos" id="toc-dialetos">Dialetos</a></li>
+<li><a href="#o-que-é-lido" id="toc-o-que-é-lido">O que é lido</a></li>
+<li><a href="#ida-e-volta" id="toc-ida-e-volta">Ida e volta</a></li>
+<li><a href="#compartilhar-por-link"
+id="toc-compartilhar-por-link">Compartilhar por link</a></li>
+</ul>
+      </nav>
+<h2 id="o-que-é">O que é</h2>
+<p><code>.jff</code> é o formato de arquivo do JFLAP: XML puro, legível
+em qualquer editor de texto. Um autômato finito é assim:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">structure</span>&gt;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">type</span>&gt;fa&lt;/<span class="kw">type</span>&gt;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">automaton</span>&gt;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">state</span> <span class="ot">id=</span><span class="st">&quot;0&quot;</span> <span class="ot">name=</span><span class="st">&quot;q0&quot;</span>&gt;</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">x</span>&gt;110.0&lt;/<span class="kw">x</span>&gt;</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">y</span>&gt;150.0&lt;/<span class="kw">y</span>&gt;</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">initial</span>/&gt;</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">state</span>&gt;</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">state</span> <span class="ot">id=</span><span class="st">&quot;1&quot;</span> <span class="ot">name=</span><span class="st">&quot;q1&quot;</span>&gt;</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">x</span>&gt;310.0&lt;/<span class="kw">x</span>&gt;</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">y</span>&gt;150.0&lt;/<span class="kw">y</span>&gt;</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">final</span>/&gt;</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">state</span>&gt;</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">transition</span>&gt;</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">from</span>&gt;0&lt;/<span class="kw">from</span>&gt;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">to</span>&gt;1&lt;/<span class="kw">to</span>&gt;</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">read</span>&gt;a&lt;/<span class="kw">read</span>&gt;</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">transition</span>&gt;</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">automaton</span>&gt;</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">structure</span>&gt;</span></code></pre></div>
+<p>Não é um formato padronizado — não há especificação publicada nem
+órgão que a mantenha — mas também não é protegido: formato de arquivo é
+especificação funcional, e implementar um leitor é interoperabilidade
+legítima. O AutomataLab reconstruiu o formato a partir de arquivos
+reais.</p>
+<h2 id="dialetos">Dialetos</h2>
+<p>O JFLAP mudou o formato entre versões, sem documentar. Os três
+dialetos que apareceram nos arquivos das aulas são aceitos na
+leitura:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Versão</th>
+<th>Diferença</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JFLAP 4.0</td>
+<td><code>&lt;state&gt;</code> e <code>&lt;transition&gt;</code> ficam
+direto sob <code>&lt;structure&gt;</code>, sem
+<code>&lt;automaton&gt;</code>; estados sem atributo <code>name</code>;
+λ como <code>&lt;read&gt;&lt;/read&gt;</code></td>
+</tr>
+<tr>
+<td>JFLAP 6.4</td>
+<td>tem <code>&lt;automaton&gt;</code>; máquinas de Moore com
+<code>&lt;output&gt;</code> no estado e <code>&lt;transout&gt;</code> na
+transição</td>
+</tr>
+<tr>
+<td>JFLAP 7.0</td>
+<td>tem <code>&lt;automaton&gt;</code>; MT com
+<code>&lt;write&gt;</code> e <code>&lt;move&gt;</code>; <code>~</code>
+em <code>&lt;write&gt;</code> significa “grava o que leu”;
+<code>&lt;tapes&gt;</code> para várias fitas; <code>&lt;block&gt;</code>
+para <em>building blocks</em></td>
+</tr>
+</tbody>
+</table>
+<p>Na gravação, o AutomataLab escreve sempre o dialeto do JFLAP 7, que
+as versões mais novas abrem.</p>
+<h2 id="o-que-é-lido">O que é lido</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><code>&lt;type&gt;</code></th>
+<th>Suporte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fa</code></td>
+<td>completo</td>
+</tr>
+<tr>
+<td><code>moore</code></td>
+<td>completo</td>
+</tr>
+<tr>
+<td><code>turing</code></td>
+<td>uma fita; a convenção (Menezes ou JFLAP) é inferida pela presença de
+<code>Δ</code></td>
+</tr>
+<tr>
+<td><code>mealy</code></td>
+<td>recusado com mensagem</td>
+</tr>
+<tr>
+<td><code>pda</code>, <code>grammar</code>, <code>re</code>,
+<code>lsystem</code>, <code>pumping-lemma</code></td>
+<td>recusados com mensagem que diz o que o arquivo contém</td>
+</tr>
+</tbody>
+</table>
+<p>Tolerâncias na leitura, todas com aviso na linha de status:</p>
+<ul>
+<li>estado sem <code>name</code> recebe <code>q&lt;id&gt;</code>;</li>
+<li>mais de um estado marcado como inicial: só o primeiro é
+mantido;</li>
+<li>transição que aponta para estado inexistente é descartada;</li>
+<li><code>&lt;block&gt;</code> é ignorado;</li>
+<li>MT com movimento fora de L/R/S usa R.</li>
+</ul>
+<h2 id="ida-e-volta">Ida e volta</h2>
+<p>Abrir um arquivo e salvá-lo de novo preserva estados, nomes,
+coordenadas, marcações e transições — testado com os 13 arquivos das
+aulas. O que <strong>não</strong> é preservado:</p>
+<ul>
+<li>comentários e formatação do XML original;</li>
+<li>o <code>&lt;transout&gt;</code> de Moore, que é reconstruído a
+partir do estado de destino;</li>
+<li><em>building blocks</em>.</li>
+</ul>
+<h2 id="compartilhar-por-link">Compartilhar por link</h2>
+<p>A URL da ferramenta aceita
+<code>?open=&lt;endereço-do-arquivo&gt;</code>. Um <code>.jff</code>
+publicado em qualquer lugar acessível ao navegador abre direto:</p>
+<pre><code>https://andersonpiresme.github.io/automatalab/?open=https://exemplo.edu/aula9/anbn.jff</code></pre>
+<p>O servidor que hospeda o arquivo precisa permitir a leitura entre
+origens (CORS); o GitHub Pages permite.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="turing.html">← Máquinas de Turing</a>
+      <a class="next" href="arquitetura.html">Como foi construído →</a>
+    </footer>
+  </main>
+</body>
+</html>

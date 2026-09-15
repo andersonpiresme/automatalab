@@ -22,22 +22,73 @@ function pointOnCircle(center, toward, radius) {
   return { x: center.x + (dx / len) * radius, y: center.y + (dy / len) * radius };
 }
 
+/** Direção padrão do laço: para cima, como nos slides. */
+export const LOOP_UP = -Math.PI / 2;
+
 /**
- * Caminho de um laço (transição de um estado para ele mesmo), desenhado acima
- * do círculo.
+ * Caminho de um laço (transição de um estado para ele mesmo).
+ *
+ * A geometria é desenhada apontando para cima e depois rotacionada para
+ * `angle`, de modo que o laço possa fugir das arestas que chegam ao estado.
+ * @param {number} angle direção do laço em radianos; LOOP_UP por padrão
  */
-export function selfLoopGeometry(state) {
-  const { x, y } = state;
-  const top = y - STATE_RADIUS;
-  const start = { x: x - 13, y: top + 3 };
-  const end = { x: x + 13, y: top + 3 };
-  const c1 = { x: x - 48, y: top - 60 };
-  const c2 = { x: x + 48, y: top - 60 };
-  return {
-    path: `M ${start.x} ${start.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`,
-    // ponto da cúbica em t = 0.5
-    label: { x, y: top - 42 },
+export function selfLoopGeometry(state, angle = LOOP_UP) {
+  const top = -STATE_RADIUS;
+  const base = {
+    start: { x: -13, y: top + 3 },
+    end: { x: 13, y: top + 3 },
+    c1: { x: -48, y: top - 60 },
+    c2: { x: 48, y: top - 60 },
+    // o ápice da cúbica fica a 45 do topo; o rótulo vai logo além dele
+    label: { x: 0, y: top - 56 },
   };
+  const rotation = angle - LOOP_UP;
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+  const place = (p) => ({ x: state.x + p.x * cos - p.y * sin, y: state.y + p.x * sin + p.y * cos });
+  const s = place(base.start);
+  const e = place(base.end);
+  const c1 = place(base.c1);
+  const c2 = place(base.c2);
+  return {
+    path: `M ${s.x} ${s.y} C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${e.x} ${e.y}`,
+    label: place(base.label),
+    angle,
+  };
+}
+
+/**
+ * Para que lado desenhar o laço de um estado: para cima, se nenhuma aresta
+ * chega ou sai por ali; senão, para o meio do maior vão entre as arestas.
+ * @param {{x:number,y:number}} state
+ * @param {{x:number,y:number}[]} neighbors estados ligados a este por arestas
+ */
+export function bestLoopAngle(state, neighbors) {
+  const angles = neighbors
+    .filter((n) => n !== state)
+    .map((n) => Math.atan2(n.y - state.y, n.x - state.x));
+  if (angles.length === 0) return LOOP_UP;
+
+  const separation = (a, b) => {
+    const d = Math.abs(a - b) % (2 * Math.PI);
+    return d > Math.PI ? 2 * Math.PI - d : d;
+  };
+  // prefere "para cima" sempre que couber: é a convenção dos slides
+  if (angles.every((a) => separation(a, LOOP_UP) > Math.PI / 3)) return LOOP_UP;
+
+  const sorted = [...angles].sort((a, b) => a - b);
+  let bestGap = -1;
+  let bestAngle = LOOP_UP;
+  for (let i = 0; i < sorted.length; i += 1) {
+    const current = sorted[i];
+    const next = i + 1 < sorted.length ? sorted[i + 1] : sorted[0] + 2 * Math.PI;
+    const gap = next - current;
+    if (gap > bestGap) {
+      bestGap = gap;
+      bestAngle = current + gap / 2;
+    }
+  }
+  return bestAngle;
 }
 
 /** Curvatura maior, para contornar um estado que está no caminho da aresta. */

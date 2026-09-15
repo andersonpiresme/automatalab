@@ -27,13 +27,36 @@ const EXPORT_STYLE = `
 `;
 
 /**
+ * Retângulo que envolve tudo que está desenhado — laços, rótulos, a seta do
+ * inicial — e não só os círculos. Vem do próprio SVG renderizado; a caixa dos
+ * estados é o recurso quando o SVG ainda não está na página.
+ */
+function contentBox(source, automaton) {
+  const margin = 24;
+  try {
+    const box = source.getBBox();
+    if (box.width > 0 && box.height > 0) {
+      return {
+        x: box.x - margin,
+        y: box.y - margin,
+        width: box.width + margin * 2,
+        height: box.height + margin * 2,
+      };
+    }
+  } catch {
+    /* elemento fora do DOM: getBBox não está disponível */
+  }
+  return boundingBox(automaton.states, 100) || { x: 0, y: 0, width: 400, height: 240 };
+}
+
+/**
  * Cópia autossuficiente do diagrama, recortada no conteúdo.
  * @param {SVGSVGElement} source
  * @param {import('../core/model.js').Automaton} automaton
  * @returns {{markup: string, width: number, height: number}}
  */
 export function toStandaloneSVG(source, automaton) {
-  const box = boundingBox(automaton.states, 60) || { x: 0, y: 0, width: 400, height: 240 };
+  const box = contentBox(source, automaton);
   const clone = source.cloneNode(true);
 
   clone.setAttribute('xmlns', SVG_NS);
