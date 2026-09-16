@@ -94,3 +94,15 @@ https://andersonpiresme.github.io/automatalab/?open=https://exemplo.edu/aula9/an
 
 O servidor que hospeda o arquivo precisa permitir a leitura entre origens
 (CORS); o GitHub Pages permite.
+
+Três parâmetros a mais deixam o link abrir já com uma execução:
+
+| Parâmetro | Efeito |
+|---|---|
+| `input=aabb` | preenche o campo de simulação |
+| `run=fast` | executa a cadeia |
+| `run=step&step=6` | abre o passo a passo e avança até o passo 6 |
+| `theme=light` ou `dark` | força o tema — útil em projetor |
+
+Assim um professor pode mandar, num único link, a máquina, a entrada e o
+passo exato a observar.

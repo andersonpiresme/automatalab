@@ -170,6 +170,35 @@ publicado em qualquer lugar acessível ao navegador abre direto:</p>
 <pre><code>https://andersonpiresme.github.io/automatalab/?open=https://exemplo.edu/aula9/anbn.jff</code></pre>
 <p>O servidor que hospeda o arquivo precisa permitir a leitura entre
 origens (CORS); o GitHub Pages permite.</p>
+<p>Três parâmetros a mais deixam o link abrir já com uma execução:</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Efeito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input=aabb</code></td>
+<td>preenche o campo de simulação</td>
+</tr>
+<tr>
+<td><code>run=fast</code></td>
+<td>executa a cadeia</td>
+</tr>
+<tr>
+<td><code>run=step&amp;step=6</code></td>
+<td>abre o passo a passo e avança até o passo 6</td>
+</tr>
+<tr>
+<td><code>theme=light</code> ou <code>dark</code></td>
+<td>força o tema — útil em projetor</td>
+</tr>
+</tbody>
+</table>
+<p>Assim um professor pode mandar, num único link, a máquina, a entrada
+e o passo exato a observar.</p>
     </article>
     <footer class="chapter-nav">
       <a class="prev" href="turing.html">← Máquinas de Turing</a>

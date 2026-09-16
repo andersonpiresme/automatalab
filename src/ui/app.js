@@ -272,7 +272,20 @@ function applyViewBox() {
 
 /** Enquadra todos os estados na área visível. */
 function fitToContent() {
-  const box = boundingBox(state.automaton.states);
+  // mede o desenho já renderizado, para laços e rótulos entrarem na conta;
+  // a caixa dos círculos é o recurso quando ainda não há nada desenhado
+  render(el.canvas, state.automaton, viewOptions());
+  let box = null;
+  try {
+    const drawn = el.canvas.getBBox();
+    if (drawn.width > 0 && drawn.height > 0) {
+      const margin = 36;
+      box = { x: drawn.x - margin, y: drawn.y - margin, width: drawn.width + 2 * margin, height: drawn.height + 2 * margin };
+    }
+  } catch {
+    /* fora do DOM não há como medir */
+  }
+  if (!box) box = boundingBox(state.automaton.states);
   if (!box) {
     state.viewBox = { ...DEFAULT_VIEWBOX };
   } else {
@@ -681,15 +694,20 @@ function activeStates() {
   return new Set((sim.generations[sim.index] || []).map((c) => c.state));
 }
 
-function refresh() {
-  render(el.canvas, state.automaton, {
+/** O que o desenho precisa saber além do autômato. */
+function viewOptions() {
+  return {
     selection: state.selection,
     linkFrom: state.linkFrom,
     pointer: state.pointer,
     active: activeStates(),
     nondet: state.highlight.nondet ? nondeterministicStates(state.automaton) : null,
     showLambda: state.highlight.lambda,
-  });
+  };
+}
+
+function refresh() {
+  render(el.canvas, state.automaton, viewOptions());
   renderDetails();
   renderTable();
   renderSimulationPanel();
@@ -1698,7 +1716,33 @@ setStatus('Pronto. Abra um .jff ou edite o exemplo.', 'ok');
  * ?open=<url> carrega um .jff logo na abertura. Serve para compartilhar um
  * exercício por link, sem precisar mandar o arquivo junto.
  */
-const openParam = new URLSearchParams(location.search).get('open');
+const params = new URLSearchParams(location.search);
+const openParam = params.get('open');
+
+// ?theme=light|dark força o tema — projetor e impressão pedem o claro
+const themeParam = params.get('theme');
+if (themeParam === 'light' || themeParam === 'dark') {
+  document.documentElement.dataset.theme = themeParam;
+}
+
+/**
+ * ?input=<cadeia> preenche o campo de simulação; ?run=fast executa,
+ * ?run=step abre o passo a passo e ?step=N avança até o passo N. Junto com
+ * ?open=, permite compartilhar por link não só a máquina, mas a execução.
+ */
+function applyRunParams() {
+  const input = params.get('input');
+  if (input === null) return;
+  el.simInput.value = input;
+  const run = params.get('run');
+  if (run === 'fast') fastRun();
+  if (run === 'step') {
+    startStepping(true);
+    const step = Number.parseInt(params.get('step') ?? '0', 10);
+    if (Number.isInteger(step) && step > 0) stepTo(step);
+  }
+}
+
 if (openParam) {
   fetch(openParam)
     .then((response) => {
@@ -1708,6 +1752,9 @@ if (openParam) {
     .then((text) => {
       const { automaton, warnings } = parseJFF(text);
       loadAutomaton(automaton, openParam.split('/').pop(), warnings);
+      applyRunParams();
     })
     .catch((error) => setStatus(`Não foi possível abrir ${openParam}: ${error.message}`, 'error'));
+} else {
+  applyRunParams();
 }
