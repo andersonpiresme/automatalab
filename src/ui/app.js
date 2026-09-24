@@ -376,7 +376,7 @@ function renderDetails() {
         </div>`);
     }
   } else {
-    parts.push('<p class="hint">Selecione um estado ou transição para editar.</p>');
+    parts.push('<p class="hint">Selecione um estado ou transição para editar — ou clique com o botão direito no diagrama.</p>');
   }
 
   el.details.innerHTML = parts.join('');
@@ -799,8 +799,21 @@ async function completeTransition(toId) {
 
 el.canvas.addEventListener('pointerdown', (event) => {
   if (state.busy) return;
+  if (event.button !== 0) return; // botão direito/meio: o menu de contexto cuida
+  closeContextMenu();
   const point = toLocal(event);
   const hit = stateAt(point);
+
+  // Completar uma transição já iniciada — pelo modo Transição ou pelo menu de
+  // contexto ("Nova transição a partir daqui"). Vale em qualquer modo.
+  if (state.linkFrom != null) {
+    if (hit) completeTransition(hit.id);
+    else {
+      state.linkFrom = null;
+      refresh();
+    }
+    return;
+  }
 
   if (state.mode === 'state') {
     if (!hit) {
@@ -815,14 +828,10 @@ el.canvas.addEventListener('pointerdown', (event) => {
   }
 
   if (state.mode === 'transition') {
-    if (!hit) {
-      state.linkFrom = null;
+    if (hit) {
+      beginTransition(hit.id);
       refresh();
-      return;
     }
-    if (state.linkFrom == null) beginTransition(hit.id);
-    else completeTransition(hit.id);
-    refresh();
     return;
   }
 
@@ -909,6 +918,200 @@ el.canvas.addEventListener('dblclick', (event) => {
   renameState(hit.id);
 });
 
+/* ------------------------------------------------------------------ *
+ * Menu de contexto (botão direito)
+ *
+ * Reúne, no próprio elemento clicado, as edições que já existem no painel
+ * lateral e nos modos — no espírito do JFLAP. Funciona em qualquer modo,
+ * então dá para editar sem trocar de ferramenta na barra.
+ * ------------------------------------------------------------------ */
+
+const contextMenu = document.createElement('div');
+contextMenu.className = 'context-menu';
+contextMenu.hidden = true;
+document.body.appendChild(contextMenu);
+
+function closeContextMenu() {
+  if (contextMenu.hidden) return;
+  contextMenu.hidden = true;
+  contextMenu.replaceChildren();
+}
+
+/**
+ * @param {number} clientX
+ * @param {number} clientY
+ * @param {Array<'sep'|{label:string,danger?:boolean,disabled?:boolean,run?:Function}>} items
+ */
+function openContextMenu(clientX, clientY, items) {
+  contextMenu.replaceChildren();
+  for (const item of items) {
+    if (item === 'sep') {
+      contextMenu.appendChild(document.createElement('hr'));
+      continue;
+    }
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = item.label;
+    if (item.danger) button.classList.add('danger');
+    if (item.disabled) {
+      button.disabled = true;
+    } else {
+      button.addEventListener('click', () => {
+        closeContextMenu();
+        item.run?.();
+      });
+    }
+    contextMenu.appendChild(button);
+  }
+  // Mostra primeiro (para medir) e então acomoda dentro da janela.
+  contextMenu.hidden = false;
+  const w = contextMenu.offsetWidth;
+  const h = contextMenu.offsetHeight;
+  const x = Math.min(clientX, window.innerWidth - w - 8);
+  const y = Math.min(clientY, window.innerHeight - h - 8);
+  contextMenu.style.left = `${Math.max(8, x)}px`;
+  contextMenu.style.top = `${Math.max(8, y)}px`;
+}
+
+function stateMenuItems(s) {
+  const items = [
+    { label: `Renomear “${s.name}”…`, run: () => renameState(s.id) },
+    {
+      label: 'Tornar inicial',
+      disabled: s.initial,
+      run: () => {
+        snapshot();
+        setInitial(state.automaton, s.id);
+        invalidateSimulation();
+        refresh();
+      },
+    },
+  ];
+  if (isTransducer(state.automaton)) {
+    items.push({
+      label: s.output ? 'Alterar saída…' : 'Definir saída…',
+      run: () => editStateOutput(s.id),
+    });
+  } else {
+    items.push({
+      label: s.final ? 'Remover final' : 'Marcar como final',
+      run: () => {
+        snapshot();
+        toggleFinal(state.automaton, s.id);
+        invalidateSimulation();
+        refresh();
+      },
+    });
+  }
+  items.push({
+    label: 'Nova transição a partir daqui…',
+    run: () => {
+      beginTransition(s.id);
+      refresh();
+    },
+  });
+  items.push('sep');
+  items.push({
+    label: 'Excluir estado',
+    danger: true,
+    run: () => {
+      state.selection = { kind: 'state', id: s.id };
+      deleteSelection();
+    },
+  });
+  return items;
+}
+
+function edgeMenuItems(edge) {
+  const from = Number(edge.dataset.from);
+  const to = Number(edge.dataset.to);
+  const a = getState(state.automaton, from);
+  const b = getState(state.automaton, to);
+  const rotulo = a && b ? `${a.name} → ${b.name}` : 'esta transição';
+  return [
+    {
+      label: isTuring(state.automaton) ? 'Adicionar transição…' : 'Adicionar símbolo…',
+      run: () => addSymbolBetween(from, to),
+    },
+    {
+      label: `Editar ${rotulo} no painel`,
+      run: () => {
+        state.selection = { kind: 'transition', id: edge.dataset.transitionId };
+        refresh();
+      },
+    },
+    'sep',
+    {
+      label: 'Excluir transições',
+      danger: true,
+      run: () => {
+        snapshot();
+        for (const t of transitionsBetween(state.automaton, from, to)) {
+          removeTransition(state.automaton, t.id);
+        }
+        state.selection = null;
+        invalidateSimulation();
+        setStatus('Transições removidas.');
+        refresh();
+      },
+    },
+  ];
+}
+
+function canvasMenuItems(point) {
+  return [
+    {
+      label: 'Novo estado aqui',
+      run: () => {
+        snapshot();
+        const created = addState(state.automaton, point.x, point.y);
+        state.selection = { kind: 'state', id: created.id };
+        invalidateSimulation();
+        setStatus(`Estado ${created.name} criado.`);
+        refresh();
+      },
+    },
+    'sep',
+    { label: 'Enquadrar', run: () => runCommand('fit') },
+    { label: 'Reposicionar automaticamente', run: () => runCommand('layout') },
+  ];
+}
+
+el.canvas.addEventListener('contextmenu', (event) => {
+  if (state.busy) return;
+  event.preventDefault();
+  closeMenus();
+  // Um destino de transição pendente tem prioridade: o clique direito o cancela.
+  if (state.linkFrom != null) {
+    state.linkFrom = null;
+    refresh();
+    return;
+  }
+  const point = toLocal(event);
+  const hitState = stateAt(point);
+  if (hitState) {
+    state.selection = { kind: 'state', id: hitState.id };
+    refresh();
+    openContextMenu(event.clientX, event.clientY, stateMenuItems(hitState));
+    return;
+  }
+  const edge = event.target.closest('.edge');
+  if (edge) {
+    state.selection = { kind: 'transition', id: edge.dataset.transitionId };
+    refresh();
+    openContextMenu(event.clientX, event.clientY, edgeMenuItems(edge));
+    return;
+  }
+  state.selection = null;
+  refresh();
+  openContextMenu(event.clientX, event.clientY, canvasMenuItems(point));
+});
+
+// Fecha o menu de contexto ao rolar, redimensionar ou perder o foco da janela.
+window.addEventListener('resize', closeContextMenu);
+window.addEventListener('blur', closeContextMenu);
+window.addEventListener('scroll', closeContextMenu, true);
+
 document.addEventListener('keydown', (event) => {
   if (state.busy) return;
 
@@ -925,6 +1128,7 @@ document.addEventListener('keydown', (event) => {
     state.linkFrom = null;
     state.selection = null;
     closeMenus();
+    closeContextMenu();
     refresh();
     return;
   }
@@ -967,6 +1171,38 @@ async function renameState(id) {
   refresh();
 }
 
+/** Edita a saída de um estado de máquina de Moore (vazio remove a saída). */
+function editStateOutput(id) {
+  const target = getState(state.automaton, id);
+  if (!target) return;
+  ask('Saída do estado', target.output ?? '', 'Deixe vazio para remover a saída.').then((value) => {
+    if (value !== null) {
+      snapshot();
+      target.output = value.trim() === '' ? null : value.trim();
+      invalidateSimulation();
+    }
+    refresh();
+  });
+}
+
+/** Pede uma ou mais transições e as adiciona entre dois estados. */
+function addSymbolBetween(from, to) {
+  const prompt = TRANSITION_PROMPT[state.automaton.type] ?? TRANSITION_PROMPT.default;
+  ask(prompt.label, '', prompt.hint).then((input) => {
+    if (input !== null) {
+      try {
+        const parsed = parseTransitionsText(input);
+        snapshot();
+        for (const { read, extra } of parsed) addTransition(state.automaton, from, to, read, extra);
+        invalidateSimulation();
+      } catch (error) {
+        setStatus(error.message, 'error');
+      }
+    }
+    refresh();
+  });
+}
+
 /* ------------------------------------------------------------------ *
  * Painel lateral: ações
  * ------------------------------------------------------------------ */
@@ -988,17 +1224,7 @@ el.details.addEventListener('click', (event) => {
       toggleFinal(state.automaton, id);
       invalidateSimulation();
     } else if (action === 'output') {
-      const target = getState(state.automaton, id);
-      ask('Saída do estado', target?.output ?? '', 'Deixe vazio para remover a saída.').then(
-        (value) => {
-          if (value !== null && target) {
-            snapshot();
-            target.output = value.trim() === '' ? null : value.trim();
-            invalidateSimulation();
-          }
-          refresh();
-        },
-      );
+      editStateOutput(id);
       return;
     } else if (action === 'delete') deleteSelection();
     refresh();
@@ -1014,22 +1240,7 @@ el.details.addEventListener('click', (event) => {
       if (button.dataset.id === state.selection.id) state.selection = null;
       invalidateSimulation();
     } else if (action === 'add-symbol') {
-      const prompt = TRANSITION_PROMPT[state.automaton.type] ?? TRANSITION_PROMPT.default;
-      ask(prompt.label, '', prompt.hint).then((input) => {
-        if (input !== null) {
-          try {
-            const parsed = parseTransitionsText(input);
-            snapshot();
-            for (const { read, extra } of parsed) {
-              addTransition(state.automaton, selected.from, selected.to, read, extra);
-            }
-            invalidateSimulation();
-          } catch (error) {
-            setStatus(error.message, 'error');
-          }
-        }
-        refresh();
-      });
+      addSymbolBetween(selected.from, selected.to);
       return;
     }
     refresh();
@@ -1231,6 +1442,7 @@ function closeMenus() {
 // clique fora fecha o menu aberto
 document.addEventListener('pointerdown', (event) => {
   if (!event.target.closest('.menu')) closeMenus();
+  if (!event.target.closest('.context-menu')) closeContextMenu();
 });
 
 // só um menu aberto por vez
