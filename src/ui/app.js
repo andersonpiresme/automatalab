@@ -46,7 +46,7 @@ import {
 import { addTrapState, mergeAutomaton } from '../core/operations.js';
 import { RegexError, automatonToRegex, regexToAutomaton } from '../core/regex.js';
 import { simulateTuring, tapeOutput } from '../core/turing.js';
-import { exampleAutomaton, exampleTuring } from '../core/examples.js';
+import { exampleAdder, exampleAnBnCn, exampleAutomaton, exampleTuring } from '../core/examples.js';
 import {
   nondeterministicStates,
   runBatch,
@@ -1291,6 +1291,16 @@ function runCommand(command) {
       snapshot();
       loadAutomaton(exampleTuring(), 'exemplo-anbn.jff');
       setStatus('Exemplo do slide: MT para L = aⁿbⁿ. Experimente aabb, ab, aab.', 'ok');
+      break;
+    case 'example-anbncn':
+      snapshot();
+      loadAutomaton(exampleAnBnCn(), 'exemplo-anbncn.jff');
+      setStatus('MT para L = aⁿbⁿcⁿ — a linguagem que um autômato com pilha não reconhece. Experimente abc, aabbcc, aabbc.', 'ok');
+      break;
+    case 'example-adder':
+      snapshot();
+      loadAutomaton(exampleAdder(), 'exemplo-somador.jff');
+      setStatus('Somador unário: 111+11 deixa 11111 na fita. O resultado aparece em "fita ao parar".', 'ok');
       break;
     case 'tape-convention': {
       if (!isTuring(state.automaton)) {
