@@ -1,8 +1,15 @@
 import { describe, test, assert, assertEqual } from './runner.js';
 import { validate } from '../src/core/model.js';
-import { exampleAdder, exampleAnBnCn, exampleAutomaton, exampleTuring } from '../src/core/examples.js';
+import {
+  exampleAdder,
+  exampleAnBnCn,
+  exampleAnBnPushdown,
+  exampleAutomaton,
+  exampleTuring,
+} from '../src/core/examples.js';
 import { accepts } from '../src/core/simulate.js';
 import { acceptsTuring, simulateTuring, tapeOutput } from '../src/core/turing.js';
+import { acceptsPushdown } from '../src/core/pushdown.js';
 import { parseJFF, serializeJFF } from '../src/io/jff.js';
 
 describe('exemplos: autômato finito e aⁿbⁿ', () => {
@@ -16,6 +23,13 @@ describe('exemplos: autômato finito e aⁿbⁿ', () => {
     const m = exampleTuring();
     assert(acceptsTuring(m, 'aabb') && !acceptsTuring(m, 'aab'), 'comportamento inesperado');
     assertEqual(m.states.length, 5);
+  });
+
+  test('o PDA aⁿbⁿ embutido', () => {
+    const m = exampleAnBnPushdown();
+    assertEqual(m.type, 'pda');
+    for (const w of ['', 'ab', 'aabb', 'aaabbb']) assert(acceptsPushdown(m, w), `deveria aceitar "${w}"`);
+    for (const w of ['a', 'aab', 'abb', 'ba']) assert(!acceptsPushdown(m, w), `não deveria aceitar "${w}"`);
   });
 });
 

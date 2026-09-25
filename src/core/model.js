@@ -22,6 +22,8 @@
  * @property {string} read  símbolo lido; string vazia é λ (AF) ou branco (MT)
  * @property {string} [write]  MT: símbolo gravado; string vazia é branco
  * @property {'L'|'R'|'S'} [move]  MT: movimento, nas letras do JFLAP
+ * @property {string} [pop]   PDA: string desempilhada do topo; vazia é λ
+ * @property {string} [push]  PDA: string empilhada (1º caractere fica no topo); vazia é λ
  *
  * @typedef {Object} Note
  * @property {string} text
@@ -29,11 +31,13 @@
  * @property {number} y
  *
  * @typedef {Object} Automaton
- * @property {'fa'|'moore'|'turing'} type  'moore' emite saída; 'turing' tem fita
+ * @property {'fa'|'moore'|'turing'|'pda'} type  'moore' emite saída; 'turing' tem fita; 'pda' tem pilha
  * @property {State[]}     states
  * @property {Transition[]} transitions
  * @property {Note[]}      notes
  * @property {'menezes'|'jflap'} [tape]  MT: convenção da fita (ver tapeConvention)
+ * @property {string} [stackBottom]  PDA: símbolo que já está na pilha no início (Z, como no JFLAP)
+ * @property {'final'|'empty'} [accept]  PDA: aceitação por estado final ou por pilha vazia
  */
 
 /** Símbolo usado na interface para representar a transição vazia. */
@@ -57,11 +61,29 @@ let transitionCounter = 0;
 export function createAutomaton(type = 'fa') {
   const automaton = { type, states: [], transitions: [], notes: [] };
   if (type === 'turing') automaton.tape = 'menezes';
+  if (type === 'pda') {
+    automaton.stackBottom = 'Z'; // como o JFLAP: a pilha começa com um Z no fundo
+    automaton.accept = 'final';
+  }
   return automaton;
 }
 
 export function isTuring(automaton) {
   return automaton.type === 'turing';
+}
+
+export function isPushdown(automaton) {
+  return automaton.type === 'pda';
+}
+
+/** Símbolo que já ocupa a pilha no início. Padrão Z, como no JFLAP. */
+export function stackBottom(automaton) {
+  return automaton.stackBottom ?? 'Z';
+}
+
+/** Modo de aceitação do PDA: por estado final (padrão) ou por pilha vazia. */
+export function acceptMode(automaton) {
+  return automaton.accept ?? 'final';
 }
 
 /**
@@ -100,6 +122,7 @@ export function isTransducer(automaton) {
 export function typeName(automaton) {
   if (automaton.type === 'moore') return 'máquina de Moore';
   if (automaton.type === 'turing') return 'máquina de Turing';
+  if (automaton.type === 'pda') return 'autômato com pilha';
   return 'autômato finito';
 }
 
@@ -116,6 +139,8 @@ export function cloneAutomaton(automaton) {
     notes: automaton.notes.map((n) => ({ ...n })),
   };
   if (automaton.tape) copy.tape = automaton.tape;
+  if (automaton.stackBottom != null) copy.stackBottom = automaton.stackBottom;
+  if (automaton.accept) copy.accept = automaton.accept;
   return copy;
 }
 
@@ -176,15 +201,19 @@ export function getState(automaton, id) {
 export function addTransition(automaton, from, to, read, extra = {}) {
   const symbol = read == null ? '' : String(read);
   const turing = automaton.type === 'turing';
+  const pda = automaton.type === 'pda';
   const write = turing ? (extra.write == null ? '' : String(extra.write)) : undefined;
   const move = turing ? extra.move || 'R' : undefined;
+  const pop = pda ? (extra.pop == null ? '' : String(extra.pop)) : undefined;
+  const push = pda ? (extra.push == null ? '' : String(extra.push)) : undefined;
 
   const duplicate = automaton.transitions.some(
     (t) =>
       t.from === from &&
       t.to === to &&
       t.read === symbol &&
-      (!turing || (t.write === write && t.move === move)),
+      (!turing || (t.write === write && t.move === move)) &&
+      (!pda || (t.pop === pop && t.push === push)),
   );
   if (duplicate) return null;
 
@@ -193,6 +222,10 @@ export function addTransition(automaton, from, to, read, extra = {}) {
   if (turing) {
     transition.write = write;
     transition.move = move;
+  }
+  if (pda) {
+    transition.pop = pop;
+    transition.push = push;
   }
   automaton.transitions.push(transition);
   return transition;
@@ -203,6 +236,11 @@ export function addTransition(automaton, from, to, read, extra = {}) {
  * AF: o símbolo (λ para vazio). MT: a tripla do curso, `(lido, gravado, mov)`.
  */
 export function transitionLabel(automaton, transition) {
+  if (automaton.type === 'pda') {
+    const sym = (s) => (s === '' ? LAMBDA : s);
+    // formato do JFLAP: "lido, desempilha ; empilha"
+    return `${sym(transition.read)}, ${sym(transition.pop)} ; ${sym(transition.push)}`;
+  }
   if (automaton.type !== 'turing') return displaySymbol(transition.read);
   const blank = blankDisplay(automaton);
   const cell = (s) => (s === '' ? blank : s);
@@ -255,6 +293,23 @@ export function tapeAlphabet(automaton) {
   result.push(...rest);
   if (symbols.has('')) result.push('');
   return result;
+}
+
+/**
+ * Alfabeto da pilha de um PDA: símbolos distintos que aparecem no que se
+ * desempilha ou empilha, mais o símbolo de fundo. Em ordem alfabética.
+ */
+export function stackAlphabet(automaton) {
+  const symbols = new Set();
+  const add = (s) => {
+    for (const ch of s || '') symbols.add(ch);
+  };
+  for (const t of automaton.transitions) {
+    add(t.pop);
+    add(t.push);
+  }
+  add(stackBottom(automaton));
+  return [...symbols].sort();
 }
 
 /** Todas as transições de `from` para `to`, na ordem de criação. */
@@ -326,6 +381,32 @@ export function parseTuringTuple(input) {
   return { read: parseTapeSymbol(parts[0]), write: parseTapeSymbol(parts[1]), move };
 }
 
+/** Um símbolo de pilha/entrada digitado: vazio, λ ou "lambda" viram string vazia. */
+function parseStackSymbol(input) {
+  const trimmed = (input || '').trim();
+  if (trimmed === '' || trimmed === LAMBDA || trimmed.toLowerCase() === 'lambda') return '';
+  return trimmed;
+}
+
+/**
+ * Lê uma transição de PDA digitada como no JFLAP: `lido, desempilha ; empilha`.
+ * Aceita vírgula ou ponto e vírgula como separadores; cada parte pode ser λ.
+ * @returns {{read:string, pop:string, push:string}}
+ * @throws {Error} com mensagem para o usuário
+ */
+export function parsePushdownTuple(input) {
+  const cleaned = (input || '').trim().replace(/^\(|\)$/g, '');
+  const parts = cleaned.split(/[,;]/).map((p) => p.trim());
+  if (parts.length !== 3) {
+    throw new Error('Use três partes: lido, desempilha, empilha — por exemplo a, Z ; aZ (λ para vazio)');
+  }
+  return {
+    read: parseStackSymbol(parts[0]),
+    pop: parseStackSymbol(parts[1]),
+    push: parseStackSymbol(parts[2]),
+  };
+}
+
 /**
  * Problemas estruturais que valem avisar ao usuário, sem impedir a edição.
  * @returns {string[]}
@@ -351,7 +432,9 @@ export function validate(automaton) {
     return problems;
   }
 
-  if (automaton.states.length > 0 && !automaton.states.some((s) => s.final)) {
+  // No PDA por pilha vazia não é preciso ter estado final.
+  const finalDispensavel = isPushdown(automaton) && acceptMode(automaton) === 'empty';
+  if (!finalDispensavel && automaton.states.length > 0 && !automaton.states.some((s) => s.final)) {
     problems.push('Nenhum estado final: a linguagem reconhecida é vazia.');
   }
 

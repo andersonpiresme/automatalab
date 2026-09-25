@@ -367,6 +367,33 @@ main {
   box-shadow: 0 2px 0 var(--accent);
 }
 
+/* PDA: a configuração mostra estado, entrada restante e a pilha (topo à esquerda) */
+.pda-config { align-items: center; flex-wrap: wrap; }
+.pda-stack {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: auto;
+  padding-left: 8px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+}
+.pda-stack .cell {
+  min-width: 1.4em;
+  padding: 2px 4px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+}
+.pda-stack .cell.blank { color: var(--muted); }
+/* o topo da pilha, à esquerda, destacado */
+.pda-stack .cell.head {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+  color: var(--ink);
+  font-weight: 700;
+}
+
 /* ---------- diálogos ---------- */
 
 dialog {

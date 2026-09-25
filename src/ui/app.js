@@ -6,6 +6,7 @@
 import {
   MOVE_DISPLAY,
   START_MARKER,
+  acceptMode,
   addState,
   addTransition,
   alphabet,
@@ -14,10 +15,13 @@ import {
   createAutomaton,
   displaySymbol,
   getState,
+  isPushdown,
   isTransducer,
   isTuring,
+  parsePushdownTuple,
   parseSymbol,
   parseTuringTuple,
+  stackAlphabet,
   tapeAlphabet,
   tapeConvention,
   transitionLabel,
@@ -46,7 +50,14 @@ import {
 import { addTrapState, mergeAutomaton } from '../core/operations.js';
 import { RegexError, automatonToRegex, regexToAutomaton } from '../core/regex.js';
 import { simulateTuring, tapeOutput } from '../core/turing.js';
-import { exampleAdder, exampleAnBnCn, exampleAutomaton, exampleTuring } from '../core/examples.js';
+import { formatStack, simulatePushdown, tracePushdown } from '../core/pushdown.js';
+import {
+  exampleAdder,
+  exampleAnBnCn,
+  exampleAnBnPushdown,
+  exampleAutomaton,
+  exampleTuring,
+} from '../core/examples.js';
 import {
   nondeterministicStates,
   runBatch,
@@ -327,12 +338,17 @@ function renderDetails() {
 
   const { states, transitions } = state.automaton;
   const turing = isTuring(state.automaton);
+  const pushdown = isPushdown(state.automaton);
   const symbols = turing
     ? tapeAlphabet(state.automaton).map((s) => (s === '' ? blankDisplay(state.automaton) : s))
     : alphabet(state.automaton);
-  const convencao = turing
-    ? ` · fita ${tapeConvention(state.automaton) === 'menezes' ? 'Menezes (Δ)' : 'JFLAP'}`
-    : '';
+  let convencao = '';
+  if (turing) {
+    convencao = ` · fita ${tapeConvention(state.automaton) === 'menezes' ? 'Menezes (Δ)' : 'JFLAP'}`;
+  } else if (pushdown) {
+    const pilha = stackAlphabet(state.automaton).join(', ') || '∅';
+    convencao = ` · pilha {${escapeHTML(pilha)}} · aceita por ${acceptMode(state.automaton) === 'empty' ? 'pilha vazia' : 'estado final'}`;
+  }
   parts.push(
     `<p class="counts">${escapeHTML(typeName(state.automaton))} · ${states.length} estado(s) · ${transitions.length} transição(ões) · ${turing ? 'alfabeto da fita' : 'alfabeto'} {${escapeHTML(symbols.join(', ')) || '∅'}}${convencao}</p>`,
   );
@@ -372,7 +388,7 @@ function renderDetails() {
           )
           .join('')}</ul>
         <div class="actions">
-          <button data-act="add-symbol">${isTuring(state.automaton) ? 'Adicionar transição' : 'Adicionar símbolo'}</button>
+          <button data-act="add-symbol">${isTuring(state.automaton) || isPushdown(state.automaton) ? 'Adicionar transição' : 'Adicionar símbolo'}</button>
         </div>`);
     }
   } else {
@@ -407,6 +423,33 @@ function renderTuringTable() {
   el.table.innerHTML = `<table><thead><tr><th>Π</th>${header}</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+/**
+ * PDA: a função δ tem três entradas e listas de saída, então em vez de uma
+ * matriz mostramos uma lista — de, (lê, desempilha, empilha), para — na ordem
+ * de criação, agrupada por estado de origem.
+ */
+function renderPushdownTable() {
+  const { automaton } = state;
+  const sym = (s) => (s === '' ? 'λ' : s);
+  const rows = [...automaton.states]
+    .sort((a, b) => a.id - b.id)
+    .flatMap((s) => {
+      const outgoing = automaton.transitions.filter((t) => t.from === s.id);
+      const marks = `${s.initial ? '→' : ''}${s.final ? '*' : ''}`;
+      if (outgoing.length === 0) {
+        return [`<tr><th scope="row">${marks}${escapeHTML(s.name)}</th><td colspan="3">—</td></tr>`];
+      }
+      return outgoing.map(
+        (t, i) =>
+          `<tr><th scope="row">${i === 0 ? `${marks}${escapeHTML(s.name)}` : ''}</th>` +
+          `<td><code>${escapeHTML(sym(t.read))}, ${escapeHTML(sym(t.pop))} ; ${escapeHTML(sym(t.push))}</code></td>` +
+          `<td>${escapeHTML(nameOf(t.to))}</td></tr>`,
+      );
+    })
+    .join('');
+  el.table.innerHTML = `<table><thead><tr><th>δ</th><th>lê, desempilha ; empilha</th><th>vai para</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
 function renderTable() {
   const { automaton } = state;
   if (automaton.states.length === 0) {
@@ -415,6 +458,10 @@ function renderTable() {
   }
   if (isTuring(automaton)) {
     renderTuringTable();
+    return;
+  }
+  if (isPushdown(automaton)) {
+    renderPushdownTable();
     return;
   }
   const symbols = alphabet(automaton);
@@ -489,6 +536,10 @@ function renderSimulationPanel() {
   }
   if (sim.kind === 'turing') {
     renderTuringPanel(sim);
+    return;
+  }
+  if (sim.kind === 'pushdown') {
+    renderPushdownPanel(sim);
     return;
   }
 
@@ -676,6 +727,91 @@ function isAcceptingConfig(config, sim) {
   return Boolean(getState(state.automaton, config.state)?.final);
 }
 
+/**
+ * Configuração de PDA: estado, o que falta da entrada e a pilha (topo à
+ * esquerda). Pilha vazia aparece como λ.
+ */
+function renderPushdownConfig(config, symbols, accepting = false) {
+  const stack =
+    config.stack === ''
+      ? '<span class="cell blank">λ</span>'
+      : config.stack
+          .split('')
+          .map((c, i) => `<span class="cell${i === 0 ? ' head' : ''}">${escapeHTML(c)}</span>`)
+          .join('');
+  return `<li class="pda-config${accepting ? ' accept' : ''}"><span class="cfg-state">${escapeHTML(nameOf(config.state))}</span>${renderTape(symbols, config.pos)}<span class="pda-stack" title="topo à esquerda">${stack}</span></li>`;
+}
+
+/** Caminho aceito de um PDA, no formato q0 —a→ q1 —λ→ q2 (símbolo lido). */
+function renderPushdownPath(path) {
+  return path
+    .map((c, i) =>
+      i === 0
+        ? escapeHTML(nameOf(c.state))
+        : `<span class="arrow">—${escapeHTML(displaySymbol(c.via?.read ?? ''))}→</span> ${escapeHTML(nameOf(c.state))}`,
+    )
+    .join(' ');
+}
+
+function renderPushdownPanel(sim) {
+  if (sim.halted === 'sem-inicial') {
+    el.simPanel.innerHTML = '<p class="verdict reject">Sem estado inicial: nada a executar.</p>';
+    return;
+  }
+
+  const parts = [];
+  const last = sim.generations.length - 1;
+  const len = sim.symbols.length;
+  const empty = acceptMode(state.automaton) === 'empty';
+  const criterio = empty ? 'pilha vazia' : 'estado final';
+  const accepts = (c) =>
+    c.pos === len && (empty ? c.stack === '' : Boolean(getState(state.automaton, c.state)?.final));
+
+  if (sim.mode === 'step') {
+    parts.push(`
+      <div class="stepper">
+        <button type="button" data-step="first" title="Início">⏮</button>
+        <button type="button" data-step="prev" title="Passo anterior">◀</button>
+        <button type="button" data-step="next" title="Próximo passo">▶</button>
+        <button type="button" data-step="last" title="Fim">⏭</button>
+        <span class="counts">passo ${sim.index} de ${last} · aceita por ${criterio}</span>
+      </div>`);
+    const configs = sim.generations[sim.index] || [];
+    if (configs.length === 0) {
+      parts.push('<p class="verdict reject">Sem configurações — a cadeia é rejeitada.</p>');
+    } else {
+      parts.push(
+        `<ul class="configs">${configs.map((c) => renderPushdownConfig(c, sim.symbols, accepts(c))).join('')}</ul>`,
+      );
+      parts.push(
+        `<p class="counts">${configs.length > 1 ? `${configs.length} computações em paralelo · ` : ''}pilha com o topo à esquerda</p>`,
+      );
+    }
+  } else {
+    const finalConfig = sim.accepting ?? sim.generations[last]?.[0];
+    if (finalConfig) {
+      parts.push(
+        `<ul class="configs">${renderPushdownConfig(finalConfig, sim.symbols, sim.accepted)}</ul>`,
+      );
+    }
+    if (sim.accepted) {
+      parts.push(`<p class="path">${renderPushdownPath(tracePushdown(sim.accepting))}</p>`);
+    }
+  }
+
+  if (sim.mode === 'fast' || sim.index === last) {
+    if (sim.halted === 'aceitou') {
+      parts.push(`<p class="verdict accept">Aceita — ${escapeHTML(sim.reason)}</p>`);
+    } else if (sim.halted === 'limite') {
+      parts.push(`<p class="verdict reject">Não parou em ${sim.steps} passos — possível loop</p>`);
+    } else {
+      parts.push('<p class="verdict reject">Rejeita</p>');
+    }
+  }
+
+  el.simPanel.innerHTML = parts.join('');
+}
+
 /* ------------------------------------------------------------------ *
  * Redesenho
  * ------------------------------------------------------------------ */
@@ -743,6 +879,10 @@ const TRANSITION_PROMPT = {
     label: 'Transição: lido, gravado, movimento',
     hint: 'Como no curso: a,A,D — E/D para o movimento, ß ou vazio para branco, Δ ou ^ para o marcador. Várias: a,A,D; b,B,E',
   },
+  pda: {
+    label: 'Transição: lido, desempilha, empilha',
+    hint: 'Como no JFLAP: a, Z ; aZ — o 1º caractere de "empilha" fica no topo. λ ou vazio para não ler / não mexer na pilha.',
+  },
   default: {
     label: 'Símbolo lido',
     hint: 'Deixe vazio para λ. Separe alternativas por vírgula: a,b',
@@ -763,6 +903,11 @@ function parseTransitionsText(input) {
         const { read, write, move } = parseTuringTuple(raw);
         return { read, extra: { write, move } };
       });
+  }
+  if (isPushdown(state.automaton)) {
+    // uma transição por diálogo: o ";" já separa desempilha de empilha
+    const { read, pop, push } = parsePushdownTuple(input);
+    return [{ read, extra: { pop, push } }];
   }
   const symbols = input.includes(',') ? input.split(',') : [input];
   return symbols.map((raw) => ({ read: parseSymbol(raw), extra: {} }));
@@ -1030,7 +1175,7 @@ function edgeMenuItems(edge) {
   const rotulo = a && b ? `${a.name} → ${b.name}` : 'esta transição';
   return [
     {
-      label: isTuring(state.automaton) ? 'Adicionar transição…' : 'Adicionar símbolo…',
+      label: isTuring(state.automaton) || isPushdown(state.automaton) ? 'Adicionar transição…' : 'Adicionar símbolo…',
       run: () => addSymbolBetween(from, to),
     },
     {
@@ -1292,11 +1437,34 @@ function runTuring(mode) {
   refresh();
 }
 
+function runPushdown(mode) {
+  const input = el.simInput.value;
+  const result = simulatePushdown(state.automaton, input);
+  state.simulation = { ...result, kind: 'pushdown', input, symbols: Array.from(input), index: 0, mode };
+  if (!warnUnknownSymbols(input)) {
+    if (mode === 'step') {
+      setStatus('Passo a passo: use ▶ ou as setas do teclado.');
+    } else if (result.halted === 'aceitou') {
+      setStatus(`Aceita (${result.reason}).`, 'ok');
+    } else if (result.halted === 'limite') {
+      setStatus('A simulação atingiu o limite — possível loop.', 'warn');
+    } else {
+      setStatus('Rejeita: nenhuma computação aceita a entrada.', 'warn');
+    }
+  }
+  refresh();
+}
+
 function fastRun() {
   const input = el.simInput.value;
 
   if (isTuring(state.automaton)) {
     runTuring('fast');
+    return;
+  }
+
+  if (isPushdown(state.automaton)) {
+    runPushdown('fast');
     return;
   }
 
@@ -1328,6 +1496,11 @@ function startStepping(closure) {
 
   if (isTuring(state.automaton)) {
     runTuring('step');
+    return;
+  }
+
+  if (isPushdown(state.automaton)) {
+    runPushdown('step');
     return;
   }
 
@@ -1499,6 +1672,11 @@ function runCommand(command) {
       loadAutomaton(createAutomaton('turing'), 'turing.jff');
       setStatus('Nova máquina de Turing (convenção do curso: Δ na célula 0). Transições no formato a,A,D.');
       break;
+    case 'new-pda':
+      snapshot();
+      loadAutomaton(createAutomaton('pda'), 'pda.jff');
+      setStatus('Novo autômato com pilha (fundo Z, aceita por estado final). Transições no formato a, Z ; aZ.');
+      break;
     case 'example-turing':
       snapshot();
       loadAutomaton(exampleTuring(), 'exemplo-anbn.jff');
@@ -1514,6 +1692,11 @@ function runCommand(command) {
       loadAutomaton(exampleAdder(), 'exemplo-somador.jff');
       setStatus('Somador unário: 111+11 deixa 11111 na fita. O resultado aparece em "fita ao parar".', 'ok');
       break;
+    case 'example-pda':
+      snapshot();
+      loadAutomaton(exampleAnBnPushdown(), 'exemplo-pda-anbn.jff');
+      setStatus('PDA para L = aⁿbⁿ (aceita por estado final). Experimente ab, aabb, aab.', 'ok');
+      break;
     case 'tape-convention': {
       if (!isTuring(state.automaton)) {
         setStatus('A convenção da fita só se aplica a máquinas de Turing.', 'warn');
@@ -1527,6 +1710,24 @@ function runCommand(command) {
         next === 'menezes'
           ? 'Fita Menezes: Δ na célula 0, cabeça começa sobre ele, branco ß.'
           : 'Fita JFLAP: infinita nos dois lados, cabeça no primeiro símbolo, branco □.',
+        'ok',
+      );
+      refresh();
+      break;
+    }
+    case 'pda-accept': {
+      if (!isPushdown(state.automaton)) {
+        setStatus('O modo de aceitação só se aplica a autômatos com pilha.', 'warn');
+        break;
+      }
+      snapshot();
+      const next = acceptMode(state.automaton) === 'final' ? 'empty' : 'final';
+      state.automaton.accept = next;
+      invalidateSimulation();
+      setStatus(
+        next === 'empty'
+          ? 'PDA agora aceita por PILHA VAZIA (não precisa de estado final).'
+          : 'PDA agora aceita por ESTADO FINAL.',
         'ok',
       );
       refresh();

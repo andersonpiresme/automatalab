@@ -23,6 +23,34 @@ export function exampleAutomaton() {
   return automaton;
 }
 
+/**
+ * L = aⁿbⁿ, n ≥ 0, num autômato com pilha — aceitação por estado final.
+ *
+ * Empilha um 'a' para cada a lido; para cada b, desempilha um 'a'. O estado
+ * final q3 só é alcançado por uma λ-transição que exige o Z no topo, ou seja,
+ * a pilha de volta ao fundo — é isso que impede aceitar sobras de a.
+ *
+ *   q0  inicial e final (aceita a cadeia vazia); ao 1º a empilha e vai a q1
+ *   q1  lê a, empilhando; ao 1º b começa a desempilhar e vai a q2
+ *   q2  lê b, desempilhando um a por b
+ *   q3  final: alcançado por λ quando resta só o Z
+ */
+export function exampleAnBnPushdown() {
+  const m = createAutomaton('pda'); // fundo Z, aceita por estado final
+  const q0 = addState(m, 140, 240, { name: 'q0', initial: true, final: true });
+  const q1 = addState(m, 360, 240, { name: 'q1' });
+  const q2 = addState(m, 580, 240, { name: 'q2' });
+  const q3 = addState(m, 800, 240, { name: 'q3', final: true });
+  const p = (from, to, read, pop, push) =>
+    addTransition(m, from.id, to.id, read, { pop, push });
+  p(q0, q1, 'a', 'Z', 'aZ');
+  p(q1, q1, 'a', 'a', 'aa');
+  p(q1, q2, 'b', 'a', '');
+  p(q2, q2, 'b', 'a', '');
+  p(q2, q3, '', 'Z', 'Z');
+  return m;
+}
+
 /** Atalho para escrever transições de MT como no slide: t(q0, q1, 'a', 'A', 'D'). */
 function tm(machine) {
   const MOVE = { E: 'L', D: 'R', S: 'S' };

@@ -83,10 +83,10 @@ export function parseJFF(text) {
   }
 
   const type = (textOf(structure, 'type') || '').trim();
-  if (type !== 'fa' && type !== 'moore' && type !== 'turing') {
+  if (type !== 'fa' && type !== 'moore' && type !== 'turing' && type !== 'pda') {
     const friendly = TYPE_NAMES[type] || `"${type}"`;
     throw new JFFError(
-      `Este arquivo contém ${friendly}. Esta versão lê autômatos finitos (fa), máquinas de Moore (moore) e máquinas de Turing de uma fita (turing).`,
+      `Este arquivo contém ${friendly}. Esta versão lê autômatos finitos (fa), autômatos com pilha (pda), máquinas de Moore (moore) e máquinas de Turing de uma fita (turing).`,
     );
   }
 
@@ -163,6 +163,12 @@ export function parseJFF(text) {
         write,
         move: ['L', 'R', 'S'].includes(move) ? move : 'R',
       });
+    } else if (type === 'pda') {
+      // <pop>/<push> ausentes ou vazios são λ (não desempilha / não empilha)
+      addTransition(automaton, from, to, read, {
+        pop: textOf(transitionEl, 'pop') || '',
+        push: textOf(transitionEl, 'push') || '',
+      });
     } else {
       addTransition(automaton, from, to, read);
     }
@@ -174,6 +180,12 @@ export function parseJFF(text) {
       (t) => t.read === START_MARKER || t.write === START_MARKER,
     );
     automaton.tape = usesMarker ? 'menezes' : 'jflap';
+  }
+
+  if (type === 'pda') {
+    // o .jff não guarda o modo de aceitação; sem estado final, só faz sentido
+    // aceitar por pilha vazia
+    automaton.accept = automaton.states.some((s) => s.final) ? 'final' : 'empty';
   }
 
   for (const noteEl of childrenByTag(automatonEl, 'note')) {
@@ -210,6 +222,7 @@ export function serializeJFF(automaton) {
   lines.push('<!--Created with AutomataLab (formato .jff, compatível com JFLAP).-->');
   const moore = automaton.type === 'moore';
   const turing = automaton.type === 'turing';
+  const pda = automaton.type === 'pda';
   const outputOf = new Map(automaton.states.map((s) => [s.id, s.output]));
 
   lines.push('<structure>');
@@ -237,6 +250,10 @@ export function serializeJFF(automaton) {
     if (turing) {
       lines.push(t.write === '' ? '\t\t\t<write/>' : `\t\t\t<write>${escapeXML(t.write)}</write>`);
       lines.push(`\t\t\t<move>${t.move}</move>`);
+    }
+    if (pda) {
+      lines.push(t.pop === '' ? '\t\t\t<pop/>' : `\t\t\t<pop>${escapeXML(t.pop)}</pop>`);
+      lines.push(t.push === '' ? '\t\t\t<push/>' : `\t\t\t<push>${escapeXML(t.push)}</push>`);
     }
     // o JFLAP grava a saída do destino também na transição; reproduzimos para
     // que o arquivo continue abrindo lá sem diferença
