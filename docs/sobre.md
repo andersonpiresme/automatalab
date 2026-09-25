@@ -2,8 +2,8 @@
 title: Informações
 subtitle: Editor e simulador de autômatos para a web
 is-sobre: true
-prev: Como foi construído
-prev-href: arquitetura.html
+prev: Roadmap
+prev-href: roadmap.html
 ---
 
 ## AutomataLab

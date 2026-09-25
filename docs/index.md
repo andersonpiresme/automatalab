@@ -75,4 +75,5 @@ Entrada, e salvar. Os capítulos seguintes detalham cada parte.
 | [Máquinas de Turing](turing.html) | A definição de Menezes, convenções de fita, transições, condições de parada, passo a passo |
 | [O formato .jff](formato-jff.html) | O que é lido e gravado, os dialetos do JFLAP, o que não é suportado |
 | [Como foi construído](arquitetura.html) | Arquitetura, decisões, testes, o uso de IA no desenvolvimento |
+| [Roadmap](roadmap.html) | O que já existe e as melhorias planejadas, em ordem de prioridade |
 | [Informações](sobre.html) | Versão, changelog, créditos e licença |

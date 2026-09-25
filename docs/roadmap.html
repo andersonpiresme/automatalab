@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roadmap — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="pushdown.html">Autômato com pilha</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+      <li><a href="roadmap.html" aria-current="page">Roadmap</a></li>
+      <li><a href="sobre.html">Informações</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Roadmap</h1>
+      <p class="subtitle">O que já existe, o que vem a seguir e em que
+ordem</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#como-ler-esta-página" id="toc-como-ler-esta-página">Como
+ler esta página</a></li>
+<li><a href="#já-entregue" id="toc-já-entregue">Já entregue</a></li>
+<li><a href="#próximos-passos-em-ordem-de-prioridade"
+id="toc-próximos-passos-em-ordem-de-prioridade">Próximos passos, em
+ordem de prioridade</a></li>
+<li><a href="#backlog-ideias" id="toc-backlog-ideias">Backlog /
+ideias</a></li>
+<li><a href="#como-priorizamos" id="toc-como-priorizamos">Como
+priorizamos</a></li>
+<li><a href="#como-colaborar" id="toc-como-colaborar">Como
+colaborar</a></li>
+</ul>
+      </nav>
+<h2 id="como-ler-esta-página">Como ler esta página</h2>
+<p>Este é o mapa das melhorias do AutomataLab: o que já está pronto, o
+que vem a seguir e <strong>em que ordem de prioridade</strong>. É um
+documento vivo — a sequência é uma proposta e pode mudar conforme a
+disciplina precisar. Sugestões são bem-vindas (ver <a
+href="#como-colaborar">Como colaborar</a> no fim).</p>
+<table>
+<thead>
+<tr>
+<th>Marca</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅</td>
+<td>entregue</td>
+</tr>
+<tr>
+<td>🚧</td>
+<td>em desenvolvimento</td>
+</tr>
+<tr>
+<td>🔜</td>
+<td>próximo (na fila)</td>
+</tr>
+<tr>
+<td>📋</td>
+<td>planejado</td>
+</tr>
+<tr>
+<td>💡</td>
+<td>ideia em avaliação</td>
+</tr>
+</tbody>
+</table>
+<p>O <strong>esforço</strong> é uma estimativa grosseira:
+<em>Pequeno</em> (horas), <em>Médio</em> (dias), <em>Grande</em> (mais
+de uma semana).</p>
+<h2 id="já-entregue">Já entregue</h2>
+<ul>
+<li>✅ <strong>Autômatos finitos</strong> — AFD, AFN e λ-AFN; simulação
+rápida e passo a passo; equivalência.</li>
+<li>✅ <strong>Conversões de regulares</strong> — AFN→AFD, minimização,
+AF↔︎expressão regular, AF↔︎gramática regular, remoção de estados
+inalcançáveis/inúteis, estado de erro.</li>
+<li>✅ <strong>Máquinas de Moore</strong> (transdutoras).</li>
+<li>✅ <strong>Máquinas de Turing</strong> de uma fita — convenções de
+Menezes (Δ) e do JFLAP.</li>
+<li>✅ <strong>Autômato com pilha (PDA)</strong> — não-determinístico,
+aceitação por estado final ou pilha vazia <em>(2026.09.24)</em>.</li>
+<li>✅ <strong>Edição por menu de contexto</strong> (botão direito)
+<em>(2026.09.24)</em>.</li>
+<li>✅ <strong>Interoperabilidade <code>.jff</code></strong> com o
+JFLAP; exportação SVG/PNG; impressão.</li>
+<li>✅ <strong>Documentação</strong> e esta página de roadmap.</li>
+</ul>
+<h2 id="próximos-passos-em-ordem-de-prioridade">Próximos passos, em
+ordem de prioridade</h2>
+<p>O critério é <strong>valor para a disciplina primeiro</strong> (o que
+o programa de Teoria da Computação cobre), depois esforço. Como o PDA
+acabou de entrar, o eixo principal agora são as <strong>linguagens
+livres de contexto</strong> — mas alguns ganhos rápidos podem se
+intercalar para manter o ritmo.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Melhoria</th>
+<th>Trilha</th>
+<th>Por que importa</th>
+<th>Esforço</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Máquina de Mealy</strong></td>
+<td>Transdutores</td>
+<td>completa o par com Moore; a saída fica na transição, não no
+estado</td>
+<td>Pequeno</td>
+<td>🔜</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Editor de gramática livre de contexto (GLC)</strong></td>
+<td>Livres de contexto</td>
+<td>base para todas as conversões e análises abaixo</td>
+<td>Médio</td>
+<td>🔜</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Conversão GLC ↔︎ PDA</strong></td>
+<td>Livres de contexto</td>
+<td>liga gramática e autômato, os dois lados da mesma classe</td>
+<td>Médio</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>GLC → Forma Normal de Chomsky</strong> e transformações</td>
+<td>Livres de contexto</td>
+<td>remover λ-produções, unitárias e símbolos inúteis</td>
+<td>Médio</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Análise sintática CYK</strong></td>
+<td>Livres de contexto</td>
+<td>decide se a cadeia pertence, com a tabela preenchida</td>
+<td>Médio</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Lema do bombeamento</strong> (regular e livre de
+contexto)</td>
+<td>Didático</td>
+<td>jogo interativo, como no JFLAP</td>
+<td>Médio</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Operações sobre AF</strong> (união, interseção, complemento,
+concatenação, estrela)</td>
+<td>Regulares</td>
+<td>mostra o fecho das linguagens regulares</td>
+<td>Médio</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Mais algoritmos de layout</strong> (círculo, árvore,
+GEM)</td>
+<td>Usabilidade</td>
+<td>organiza autômatos grandes automaticamente</td>
+<td>Pequeno</td>
+<td>📋</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Análise LL(1) / SLR(1)</strong> com árvore de derivação</td>
+<td>Livres de contexto</td>
+<td><em>parsing</em> preditivo e ascendente, com as tabelas</td>
+<td>Grande</td>
+<td>💡</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>MT multifita</strong></td>
+<td>Turing</td>
+<td>além da fita única, como no JFLAP</td>
+<td>Médio</td>
+<td>💡</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Conversões guiadas passo a passo</strong> (o aluno monta, a
+ferramenta corrige)</td>
+<td>Didático</td>
+<td>aprender construindo, não só vendo o resultado</td>
+<td>Grande</td>
+<td>💡</td>
+</tr>
+</tbody>
+</table>
+<h2 id="backlog-ideias">Backlog / ideias</h2>
+<p>Coisas de menor prioridade para o curso, mas que fariam sentido um
+dia:</p>
+<ul>
+<li>💡 <strong>Correção em lote</strong> (<em>batch grade</em>) — rodar
+uma pasta de respostas contra um gabarito.</li>
+<li>💡 <strong>L-System</strong> — os gráficos tartaruga do JFLAP.</li>
+<li>💡 <strong>Turing por blocos</strong> (<em>building blocks</em>) —
+máquinas hierárquicas.</li>
+<li>💡 <strong>Exportar a execução</strong> como imagem/animação para
+colar em slides.</li>
+</ul>
+<h2 id="como-priorizamos">Como priorizamos</h2>
+<ol type="1">
+<li><strong>O que a disciplina cobre</strong> vem antes do que é “legal
+de ter”.</li>
+<li>Entre itens de valor parecido, o de <strong>menor esforço</strong>
+primeiro.</li>
+<li><strong>Ganhos rápidos</strong> (Mealy, layouts) podem entrar entre
+os grandes para não ficar muito tempo sem algo visível.</li>
+<li>Cada item segue o mesmo método: <strong>núcleo com testes
+primeiro</strong>, depois a interface — como foi com o PDA.</li>
+</ol>
+<h2 id="como-colaborar">Como colaborar</h2>
+<p>Ideias, correções de prioridade e pedidos são bem-vindos. O canal é o
+repositório: abra uma <em>issue</em> em <a
+href="https://github.com/andersonpiresme/automatalab/issues"
+class="uri">https://github.com/andersonpiresme/automatalab/issues</a>
+descrevendo a melhoria e, se puder, onde ela aparece no programa da
+disciplina. A ordem desta página é uma proposta — dizer “isto é mais
+urgente para a próxima aula” muda a fila.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="arquitetura.html">← Como foi construído</a>
+      <a class="next" href="sobre.html">Informações →</a>
+    </footer>
+  </main>
+</body>
+</html>

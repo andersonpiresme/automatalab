@@ -4,8 +4,8 @@ subtitle: Arquitetura, decisões, testes — e o papel da IA no desenvolvimento
 is-arq: true
 prev: O formato .jff
 prev-href: formato-jff.html
-next: Informações
-next-href: sobre.html
+next: Roadmap
+next-href: roadmap.html
 ---
 
 ## Sem instalação, nem para desenvolver
