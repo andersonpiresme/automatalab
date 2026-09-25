@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autômato com pilha — AutomataLab</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="sidebar" aria-label="Capítulos">
+    <a class="brand" href="../">AutomataLab</a>
+    <p class="brand-sub">Documentação</p>
+    <ol>
+      <li><a href="index.html">Introdução</a></li>
+      <li><a href="interface.html">Interface e menus</a></li>
+      <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
+      <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="pushdown.html" aria-current="page">Autômato com pilha</a></li>
+      <li><a href="turing.html">Máquinas de Turing</a></li>
+      <li><a href="formato-jff.html">O formato .jff</a></li>
+      <li><a href="arquitetura.html">Como foi construído</a></li>
+      <li><a href="sobre.html">Informações</a></li>
+    </ol>
+    <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
+  </nav>
+
+  <main class="content">
+    <article>
+      <h1>Autômato com pilha</h1>
+      <p class="subtitle">Uma pilha entre a entrada e os estados — o
+reconhecedor das linguagens livres de contexto</p>
+      <nav class="toc" aria-label="Nesta página">
+        <p class="toc-title">Nesta página</p>
+<ul>
+<li><a href="#o-que-é" id="toc-o-que-é">O que é</a></li>
+<li><a href="#a-convenção-da-ferramenta"
+id="toc-a-convenção-da-ferramenta">A convenção da ferramenta</a></li>
+<li><a href="#as-transições" id="toc-as-transições">As
+transições</a></li>
+<li><a href="#como-a-máquina-aceita" id="toc-como-a-máquina-aceita">Como
+a máquina aceita</a></li>
+<li><a href="#não-determinismo"
+id="toc-não-determinismo">Não-determinismo</a></li>
+<li><a href="#um-exemplo-aⁿbⁿ" id="toc-um-exemplo-aⁿbⁿ">Um exemplo:
+<code>aⁿbⁿ</code></a></li>
+<li><a href="#o-que-ainda-não-há" id="toc-o-que-ainda-não-há">O que
+ainda não há</a></li>
+</ul>
+      </nav>
+<h2 id="o-que-é">O que é</h2>
+<p>Um <strong>autômato com pilha</strong> (PDA, de <em>pushdown
+automaton</em>) é um autômato finito com uma memória a mais: uma
+<strong>pilha</strong>. A cada passo ele olha o símbolo da entrada e o
+<strong>topo da pilha</strong>, e decide para onde ir, o que remover do
+topo e o que colocar de volta. É essa pilha que lhe dá poder para contar
+de forma irrestrita — e por isso os PDA reconhecem exatamente as
+<strong>linguagens livres de contexto</strong>, uma classe acima dos
+autômatos finitos e abaixo das máquinas de Turing.</p>
+<p>O exemplo clássico é <code>aⁿbⁿ</code>: empilha-se um símbolo para
+cada <code>a</code> e desempilha-se um para cada <code>b</code>; se a
+pilha volta ao fundo exatamente quando a entrada acaba, as quantidades
+batiam. Um autômato finito não consegue fazer isso — não tem onde
+guardar a contagem.</p>
+<h2 id="a-convenção-da-ferramenta">A convenção da ferramenta</h2>
+<p>O AutomataLab segue a mesma convenção do JFLAP, para manter a
+compatibilidade de arquivos:</p>
+<ul>
+<li>A pilha começa com <strong>um único símbolo de fundo</strong>, o
+<code>Z</code>. Ele marca o fundo e pode ser lido e removido como
+qualquer outro.</li>
+<li>Cada transição tem três partes: <strong>o que lê</strong> da
+entrada, <strong>o que desempilha</strong> do topo e <strong>o que
+empilha</strong> de volta.</li>
+<li>No painel de simulação, a pilha é mostrada com o <strong>topo à
+esquerda</strong>. Empilhar <code>aZ</code> deixa o <code>a</code> no
+topo e o <code>Z</code> embaixo.</li>
+</ul>
+<h2 id="as-transições">As transições</h2>
+<p>O rótulo de uma transição tem o formato
+<code>lido, desempilha ; empilha</code>. Ao criar uma transição, digite
+as três partes separadas por vírgula ou ponto e vírgula; <code>λ</code>,
+<code>lambda</code> ou vazio valem para “não ler”, “não desempilhar” ou
+“não empilhar”.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Rótulo</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a, Z ; aZ</code></td>
+<td>lê <code>a</code>, desempilha <code>Z</code>, empilha
+<code>aZ</code> (troca o <code>Z</code> por <code>aZ</code> — o
+<code>a</code> fica no topo)</td>
+</tr>
+<tr>
+<td><code>a, a ; aa</code></td>
+<td>lê <code>a</code>, desempilha um <code>a</code>, empilha dois — a
+pilha cresce</td>
+</tr>
+<tr>
+<td><code>b, a ; λ</code></td>
+<td>lê <code>b</code>, desempilha um <code>a</code>, não empilha nada —
+a pilha encolhe</td>
+</tr>
+<tr>
+<td><code>λ, Z ; Z</code></td>
+<td>não lê nada; só confere que o <code>Z</code> está no topo (transição
+espontânea)</td>
+</tr>
+</tbody>
+</table>
+<p>Uma transição só é aplicável quando <strong>o símbolo lido casa com a
+entrada</strong> (ou é <code>λ</code>) <strong>e o topo da pilha começa
+com o que ela desempilha</strong>. Empilhar uma string coloca o
+<strong>primeiro caractere no topo</strong>; desempilhar uma string
+exige que o topo, lido de cima para baixo, seja exatamente aquela
+string.</p>
+<h2 id="como-a-máquina-aceita">Como a máquina aceita</h2>
+<p>Há duas convenções, e o menu <strong>Exibir → Pilha: alternar
+aceitação</strong> troca entre elas. A escolha aparece no painel de
+seleção.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Modo</th>
+<th>Aceita quando…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Estado final</strong> (padrão)</td>
+<td>a entrada acabou <strong>e</strong> a máquina está num estado final
+— a pilha pode ter qualquer conteúdo</td>
+</tr>
+<tr>
+<td><strong>Pilha vazia</strong></td>
+<td>a entrada acabou <strong>e</strong> a pilha ficou vazia — não é
+preciso ter estado final</td>
+</tr>
+</tbody>
+</table>
+<p>As duas convenções reconhecem a mesma classe de linguagens; muda só
+como se escreve a máquina. Ao <strong>abrir</strong> um
+<code>.jff</code>, como o formato não guarda essa escolha, a ferramenta
+infere: uma máquina <strong>sem estado final</strong> só pode aceitar
+por pilha vazia.</p>
+<h2 id="não-determinismo">Não-determinismo</h2>
+<p>O PDA é, por natureza, não-determinístico: do mesmo estado, lendo o
+mesmo símbolo e com o mesmo topo, pode haver <strong>mais de
+uma</strong> transição — e as transições <code>λ</code> disparam sem
+consumir entrada. A simulação percorre <strong>todas as computações ao
+mesmo tempo</strong>, em largura, como nos autômatos finitos e nas
+máquinas de Turing.</p>
+<p>No passo a passo, cada configuração viva aparece como uma linha —
+estado, entrada restante e pilha — e o contador indica quantas
+computações correm em paralelo. A cadeia é <strong>aceita</strong> se
+<strong>alguma</strong> delas aceita; é <strong>rejeitada</strong>
+quando todas morrem (nenhuma transição aplicável) sem aceitar. Para
+proteger contra máquinas que empilham para sempre, há um teto de passos:
+atingi-lo é reportado como “possível loop”, não como rejeição.</p>
+<h2 id="um-exemplo-aⁿbⁿ">Um exemplo: <code>aⁿbⁿ</code></h2>
+<p>O menu <strong>Arquivo → Exemplo: PDA para aⁿbⁿ</strong> carrega esta
+máquina, com aceitação por estado final:</p>
+<table>
+<thead>
+<tr>
+<th>De</th>
+<th><code>lido, desempilha ; empilha</code></th>
+<th>Para</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>→*q0</td>
+<td><code>a, Z ; aZ</code></td>
+<td>q1</td>
+</tr>
+<tr>
+<td>q1</td>
+<td><code>a, a ; aa</code></td>
+<td>q1</td>
+</tr>
+<tr>
+<td>q1</td>
+<td><code>b, a ; λ</code></td>
+<td>q2</td>
+</tr>
+<tr>
+<td>q2</td>
+<td><code>b, a ; λ</code></td>
+<td>q2</td>
+</tr>
+<tr>
+<td>q2</td>
+<td><code>λ, Z ; Z</code></td>
+<td>*q3</td>
+</tr>
+</tbody>
+</table>
+<p>A ideia: <code>q0</code>/<code>q1</code> empilham um <code>a</code>
+para cada <code>a</code> lido; ao primeiro <code>b</code>, começa-se a
+desempilhar um <code>a</code> por <code>b</code>. O estado final
+<code>q3</code> só é alcançado pela transição <code>λ, Z ; Z</code>, que
+exige o <code>Z</code> no topo — ou seja, a pilha de volta ao fundo. É
+esse detalhe que impede aceitar sobras: em <code>aab</code>, sobra um
+<code>a</code> no topo e a máquina não chega a <code>q3</code>. Como
+<code>q0</code> também é final e é alcançado com a entrada vazia, a
+cadeia vazia (<code>n = 0</code>) é aceita.</p>
+<p>Experimente <code>ab</code>, <code>aabb</code>, <code>aaabbb</code>
+(aceitas) e <code>a</code>, <code>aab</code>, <code>abb</code>,
+<code>ba</code> (rejeitadas). Troque para <strong>aceitação por pilha
+vazia</strong> no menu Exibir e veja como o critério muda.</p>
+<h2 id="o-que-ainda-não-há">O que ainda não há</h2>
+<p>Esta versão edita e simula PDA, mas ainda <strong>não</strong>
+converte entre PDA e gramática livre de contexto (nem faz
+<em>parsing</em> CYK/LL/SLR). Essas conversões são o próximo passo
+natural do lado das linguagens livres de contexto.</p>
+    </article>
+    <footer class="chapter-nav">
+      <a class="prev" href="moore.html">← Máquinas de Moore</a>
+      <a class="next" href="turing.html">Máquinas de Turing →</a>
+    </footer>
+  </main>
+</body>
+</html>

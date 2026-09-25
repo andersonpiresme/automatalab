@@ -15,9 +15,11 @@
       <li><a href="interface.html">Interface e menus</a></li>
       <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
       <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="pushdown.html">Autômato com pilha</a></li>
       <li><a href="turing.html">Máquinas de Turing</a></li>
       <li><a href="formato-jff.html">O formato .jff</a></li>
       <li><a href="arquitetura.html">Como foi construído</a></li>
+      <li><a href="sobre.html">Informações</a></li>
     </ol>
     <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
   </nav>
@@ -39,9 +41,10 @@ id="toc-o-que-este-manual-cobre">O que este manual cobre</a></li>
 <h2 id="introdução">Introdução</h2>
 <p>O AutomataLab é um editor e simulador de autômatos que roda inteiro
 no navegador. Cobre autômatos finitos (determinísticos e
-não-determinísticos, com transições λ), máquinas de Moore e máquinas de
-Turing de uma fita. Lê e grava o formato <code>.jff</code> do JFLAP, de
-modo que o material didático já existente continua servindo.</p>
+não-determinísticos, com transições λ), máquinas de Moore, autômatos com
+pilha e máquinas de Turing de uma fita. Lê e grava o formato
+<code>.jff</code> do JFLAP, de modo que o material didático já existente
+continua servindo.</p>
 <p>Nasceu na disciplina de Teoria da Computação do mestrado em
 Computação Aplicada da Univali, no segundo semestre de 2026. O JFLAP — a
 ferramenta de referência da área, mantida pela Duke University desde os
@@ -71,9 +74,9 @@ class="uri">https://andersonpiresme.github.io/automatalab/</a>. Não há
 instalação, cadastro nem servidor: tudo acontece no navegador, e os
 arquivos ficam na sua máquina.</p>
 <p>A tela tem três regiões:</p>
-<p><strong>Barra de menus</strong>, no alto. Cinco menus — Arquivo,
-Entrada, Testar, Converter, Exibir — organizados como no JFLAP, para que
-quem conhece um se oriente no outro. À direita ficam as quatro
+<p><strong>Barra de menus</strong>, no alto. Seis menus — Arquivo,
+Entrada, Testar, Converter, Exibir e Ajuda — organizados como no JFLAP,
+para que quem conhece um se oriente no outro. À direita ficam as quatro
 ferramentas de edição (Selecionar, Estado, Transição, Apagar), os botões
 de desfazer e refazer e o nome do arquivo aberto.</p>
 <p><strong>Área de desenho</strong>, o centro. É onde o autômato aparece
@@ -120,6 +123,11 @@ equivalência</td>
 <td>Saída nos estados, execução como transdutor</td>
 </tr>
 <tr>
+<td><a href="pushdown.html">Autômato com pilha</a></td>
+<td>Pilha, pop/push, não-determinismo, aceitação por estado final ou
+pilha vazia</td>
+</tr>
+<tr>
 <td><a href="turing.html">Máquinas de Turing</a></td>
 <td>A definição de Menezes, convenções de fita, transições, condições de
 parada, passo a passo</td>
@@ -132,6 +140,10 @@ suportado</td>
 <tr>
 <td><a href="arquitetura.html">Como foi construído</a></td>
 <td>Arquitetura, decisões, testes, o uso de IA no desenvolvimento</td>
+</tr>
+<tr>
+<td><a href="sobre.html">Informações</a></td>
+<td>Versão, changelog, créditos e licença</td>
 </tr>
 </tbody>
 </table>

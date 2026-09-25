@@ -20,6 +20,18 @@ desenho faz. A linha de status lembra o que a ferramenta ativa espera.
 | **Transição** | cancela a origem | primeiro clique marca a origem, segundo marca o destino e abre o diálogo | clicar duas vezes no mesmo estado cria um laço |
 | **Apagar** | — | remove o estado e suas transições | clique numa aresta remove todas as transições dela |
 
+### Menu de contexto (botão direito)
+
+Clicar com o **botão direito** num estado, numa transição ou no espaço vazio abre
+um menu com as edições daquele elemento, no espírito do JFLAP:
+
+- **Estado**: renomear, tornar inicial, marcar/remover final (ou definir a saída,
+  em Moore), criar uma transição a partir dali, excluir.
+- **Transição**: adicionar outra transição àquele par, editar no painel, excluir.
+- **Espaço vazio**: criar um estado ali, enquadrar, reposicionar.
+
+Funciona em qualquer ferramenta, sem precisar trocar de modo na barra.
+
 ## O diálogo de transição
 
 Ao criar uma transição, a ferramenta pergunta o rótulo. O que se digita depende
@@ -32,6 +44,10 @@ do tipo de máquina:
   aulas — `a,A,D`. Aceita `E`/`D` (esquerda/direita) ou `L`/`R`/`S`; `ß`, `□`,
   `_` ou vazio para o branco; `Δ` ou `^` para o marcador de início. Ponto e
   vírgula separa várias: `a,A,D; b,B,E`.
+- **Autômato com pilha**: a tripla `lido, desempilha ; empilha`, na notação do
+  JFLAP — `a, Z ; aZ`. O primeiro caractere de *empilha* fica no topo. `λ`,
+  `lambda` ou vazio significam não ler nada, não desempilhar ou não empilhar.
+  Uma transição por diálogo.
 
 Se a tripla vier malformada, o diálogo recusa com a mensagem do erro e nada é
 alterado.
@@ -39,7 +55,7 @@ alterado.
 ## Painel de seleção
 
 Com um **estado** selecionado: renomear, tornar inicial, marcar ou remover
-final (autômatos finitos e MT) ou definir a saída (Moore), excluir.
+final (autômatos finitos, PDA e MT) ou definir a saída (Moore), excluir.
 
 Com uma **transição** selecionada: a lista dos rótulos entre aquele par de
 estados, cada um com o botão para removê-lo, e o botão para adicionar outro.
@@ -48,14 +64,15 @@ estados, cada um com o botão para removê-lo, e o botão para adicionar outro.
 
 | Item | O que faz |
 |---|---|
-| Novo autômato finito / Nova máquina de Moore / Nova máquina de Turing | começa um documento vazio do tipo escolhido |
+| Novo autômato finito / Moore / Turing / autômato com pilha | começa um documento vazio do tipo escolhido |
 | Abrir .jff… | lê um arquivo do JFLAP ou do próprio AutomataLab |
 | Mesclar .jff… | traz os estados e transições de outro arquivo para o documento atual, sem conectá-los — a "união disjunta" que o JFLAP chama de *Combine Automata*. Os tipos precisam coincidir |
 | Salvar .jff | grava o documento no formato do JFLAP |
 | Salvar imagem SVG / PNG | exporta o diagrama, na paleta clara, recortado no conteúdo |
 | Imprimir… | abre o diálogo de impressão com só o diagrama, em preto e branco |
 | Exemplo: AF que termina em 01 | carrega o DFA das cadeias binárias terminadas em `01` |
-| Exemplo: MT para aⁿbⁿ | carrega a máquina de Turing do slide 10 da aula 9, com a mesma disposição |
+| Exemplo: MT para aⁿbⁿ / aⁿbⁿcⁿ / somador unário | carregam máquinas de Turing prontas |
+| Exemplo: PDA para aⁿbⁿ | carrega o autômato com pilha que reconhece `aⁿbⁿ`, com aceitação por estado final |
 
 A ferramenta também aceita `?open=<url>` no endereço para abrir um arquivo
 direto — útil para compartilhar um exercício por link.
@@ -108,6 +125,7 @@ anterior.
 | Enquadrar | ajusta o zoom para caber todo o autômato |
 | Reposicionar automaticamente | reorganiza os estados por força dirigida — o resultado é sempre o mesmo para o mesmo autômato |
 | Fita: alternar Menezes (Δ) / JFLAP | só para MT; troca a convenção da fita (ver o capítulo de máquinas de Turing) |
+| Pilha: alternar aceitação (final / vazia) | só para PDA; troca entre aceitar por estado final e por pilha vazia |
 
 ## Atalhos de teclado
 

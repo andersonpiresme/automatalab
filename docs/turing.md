@@ -2,8 +2,8 @@
 title: Máquinas de Turing
 subtitle: A definição das aulas, implementada célula a célula
 is-turing: true
-prev: Máquinas de Moore
-prev-href: moore.html
+prev: Autômato com pilha
+prev-href: pushdown.html
 next: O formato .jff
 next-href: formato-jff.html
 ---

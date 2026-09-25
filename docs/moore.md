@@ -4,8 +4,8 @@ subtitle: Quando o autômato produz saída em vez de aceitar
 is-moore: true
 prev: Autômatos finitos
 prev-href: automatos-finitos.html
-next: Máquinas de Turing
-next-href: turing.html
+next: Autômato com pilha
+next-href: pushdown.html
 ---
 
 ## O modelo

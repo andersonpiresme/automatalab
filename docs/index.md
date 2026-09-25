@@ -10,9 +10,9 @@ next-href: interface.html
 
 O AutomataLab é um editor e simulador de autômatos que roda inteiro no
 navegador. Cobre autômatos finitos (determinísticos e não-determinísticos, com
-transições λ), máquinas de Moore e máquinas de Turing de uma fita. Lê e grava o
-formato `.jff` do JFLAP, de modo que o material didático já existente continua
-servindo.
+transições λ), máquinas de Moore, autômatos com pilha e máquinas de Turing de
+uma fita. Lê e grava o formato `.jff` do JFLAP, de modo que o material didático
+já existente continua servindo.
 
 Nasceu na disciplina de Teoria da Computação do mestrado em Computação Aplicada
 da Univali, no segundo semestre de 2026. O JFLAP — a ferramenta de referência
@@ -44,9 +44,9 @@ ficam na sua máquina.
 
 A tela tem três regiões:
 
-**Barra de menus**, no alto. Cinco menus — Arquivo, Entrada, Testar, Converter,
-Exibir — organizados como no JFLAP, para que quem conhece um se oriente no
-outro. À direita ficam as quatro ferramentas de edição (Selecionar, Estado,
+**Barra de menus**, no alto. Seis menus — Arquivo, Entrada, Testar, Converter,
+Exibir e Ajuda — organizados como no JFLAP, para que quem conhece um se oriente
+no outro. À direita ficam as quatro ferramentas de edição (Selecionar, Estado,
 Transição, Apagar), os botões de desfazer e refazer e o nome do arquivo aberto.
 
 **Área de desenho**, o centro. É onde o autômato aparece e é editado. Estados são
@@ -71,6 +71,8 @@ Entrada, e salvar. Os capítulos seguintes detalham cada parte.
 | [Interface e menus](interface.html) | Cada item de menu, as ferramentas de edição, os atalhos de teclado |
 | [Autômatos finitos](automatos-finitos.html) | Edição, simulação, conversões (DFA, mínimo, ER, gramática), equivalência |
 | [Máquinas de Moore](moore.html) | Saída nos estados, execução como transdutor |
+| [Autômato com pilha](pushdown.html) | Pilha, pop/push, não-determinismo, aceitação por estado final ou pilha vazia |
 | [Máquinas de Turing](turing.html) | A definição de Menezes, convenções de fita, transições, condições de parada, passo a passo |
 | [O formato .jff](formato-jff.html) | O que é lido e gravado, os dialetos do JFLAP, o que não é suportado |
 | [Como foi construído](arquitetura.html) | Arquitetura, decisões, testes, o uso de IA no desenvolvimento |
+| [Informações](sobre.html) | Versão, changelog, créditos e licença |

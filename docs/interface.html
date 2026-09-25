@@ -15,9 +15,11 @@
       <li><a href="interface.html" aria-current="page">Interface e menus</a></li>
       <li><a href="automatos-finitos.html">Autômatos finitos</a></li>
       <li><a href="moore.html">Máquinas de Moore</a></li>
+      <li><a href="pushdown.html">Autômato com pilha</a></li>
       <li><a href="turing.html">Máquinas de Turing</a></li>
       <li><a href="formato-jff.html">O formato .jff</a></li>
       <li><a href="arquitetura.html">Como foi construído</a></li>
+      <li><a href="sobre.html">Informações</a></li>
     </ol>
     <p class="sidebar-foot"><a href="https://github.com/andersonpiresme/automatalab">Código no GitHub</a></p>
   </nav>
@@ -93,6 +95,22 @@ diálogo</td>
 </tr>
 </tbody>
 </table>
+<h3 id="menu-de-contexto-botão-direito">Menu de contexto (botão
+direito)</h3>
+<p>Clicar com o <strong>botão direito</strong> num estado, numa
+transição ou no espaço vazio abre um menu com as edições daquele
+elemento, no espírito do JFLAP:</p>
+<ul>
+<li><strong>Estado</strong>: renomear, tornar inicial, marcar/remover
+final (ou definir a saída, em Moore), criar uma transição a partir dali,
+excluir.</li>
+<li><strong>Transição</strong>: adicionar outra transição àquele par,
+editar no painel, excluir.</li>
+<li><strong>Espaço vazio</strong>: criar um estado ali, enquadrar,
+reposicionar.</li>
+</ul>
+<p>Funciona em qualquer ferramenta, sem precisar trocar de modo na
+barra.</p>
 <h2 id="o-diálogo-de-transição">O diálogo de transição</h2>
 <p>Ao criar uma transição, a ferramenta pergunta o rótulo. O que se
 digita depende do tipo de máquina:</p>
@@ -108,12 +126,17 @@ uma lendo <code>a</code> e outra lendo <code>b</code>.</li>
 <code>ß</code>, <code>□</code>, <code>_</code> ou vazio para o branco;
 <code>Δ</code> ou <code>^</code> para o marcador de início. Ponto e
 vírgula separa várias: <code>a,A,D; b,B,E</code>.</li>
+<li><strong>Autômato com pilha</strong>: a tripla
+<code>lido, desempilha ; empilha</code>, na notação do JFLAP —
+<code>a, Z ; aZ</code>. O primeiro caractere de <em>empilha</em> fica no
+topo. <code>λ</code>, <code>lambda</code> ou vazio significam não ler
+nada, não desempilhar ou não empilhar. Uma transição por diálogo.</li>
 </ul>
 <p>Se a tripla vier malformada, o diálogo recusa com a mensagem do erro
 e nada é alterado.</p>
 <h2 id="painel-de-seleção">Painel de seleção</h2>
 <p>Com um <strong>estado</strong> selecionado: renomear, tornar inicial,
-marcar ou remover final (autômatos finitos e MT) ou definir a saída
+marcar ou remover final (autômatos finitos, PDA e MT) ou definir a saída
 (Moore), excluir.</p>
 <p>Com uma <strong>transição</strong> selecionada: a lista dos rótulos
 entre aquele par de estados, cada um com o botão para removê-lo, e o
@@ -132,8 +155,7 @@ botão para adicionar outro.</p>
 </thead>
 <tbody>
 <tr>
-<td>Novo autômato finito / Nova máquina de Moore / Nova máquina de
-Turing</td>
+<td>Novo autômato finito / Moore / Turing / autômato com pilha</td>
 <td>começa um documento vazio do tipo escolhido</td>
 </tr>
 <tr>
@@ -165,9 +187,13 @@ branco</td>
 <code>01</code></td>
 </tr>
 <tr>
-<td>Exemplo: MT para aⁿbⁿ</td>
-<td>carrega a máquina de Turing do slide 10 da aula 9, com a mesma
-disposição</td>
+<td>Exemplo: MT para aⁿbⁿ / aⁿbⁿcⁿ / somador unário</td>
+<td>carregam máquinas de Turing prontas</td>
+</tr>
+<tr>
+<td>Exemplo: PDA para aⁿbⁿ</td>
+<td>carrega o autômato com pilha que reconhece <code>aⁿbⁿ</code>, com
+aceitação por estado final</td>
 </tr>
 </tbody>
 </table>
@@ -331,6 +357,11 @@ mesmo para o mesmo autômato</td>
 <td>Fita: alternar Menezes (Δ) / JFLAP</td>
 <td>só para MT; troca a convenção da fita (ver o capítulo de máquinas de
 Turing)</td>
+</tr>
+<tr>
+<td>Pilha: alternar aceitação (final / vazia)</td>
+<td>só para PDA; troca entre aceitar por estado final e por pilha
+vazia</td>
 </tr>
 </tbody>
 </table>

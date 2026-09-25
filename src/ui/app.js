@@ -1629,6 +1629,11 @@ for (const menu of document.querySelectorAll('.menu')) {
 }
 
 document.addEventListener('click', (event) => {
+  // links do menu (Ajuda) abrem em nova aba; só fecha o menu
+  if (event.target.closest('.menu-items a')) {
+    closeMenus();
+    return;
+  }
   const button = event.target.closest('[data-cmd]');
   if (!button) return;
   closeMenus();
